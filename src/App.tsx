@@ -1,0 +1,118 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/auth";
+import RutaPrivada from "./components/RutaPrivada";
+
+import Sidebar from "./components/Sidebar";
+import TopBar from "./components/TopBar";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+
+import IngresarSocio from "./pages/Socios/IngresarSocio";
+import GestionarSocios from "./pages/Socios/GestionarSocios";
+import CrearGrupoFamiliar from "./pages/GrupoFamiliar/CrearGrupoFamiliar";
+import GestionarGrupoFamiliar from "./pages/GrupoFamiliar/GestionarGrupoFamiliar";
+import GenerarMensual from "./pages/Cuotas/GenerarMensual";
+import GenerarIndividual from "./pages/Cuotas/GenerarIndividual";
+import PagosRapidos from "./pages/Cuotas/pagoCB";
+import ControlCuotas from "./pages/Cuotas/ControlCuotas";
+import ImprimirCuotas from "./pages/Cuotas/ImprimirCuotas";
+import GenerarLinksMasivosMP from "./pages/Cuotas/mercadopago";
+import InformeMorosidadConsolidada from "./pages/Informes/InformeMorosidadConsolidada";
+import InformeCuotasFiltros from "./pages/Informes/InformeCuotasFiltros";
+import CrearUsuario from "./pages/Usuarios/CrearUsuario";
+
+// Rutas para SOCIO
+import LoginSocio from "./pages/Socios/LoginSocio";
+import PerfilSocio from "./pages/Socios/PerfilSocio";
+import CambiarClaveSocio from "./pages/Socios/CambiarClaveSocio";
+import VerGrupoFamiliar from "./pages/Socios/VerGrupoFamiliar";
+import VerCuotasGrupo from "./pages/Socios/VerCuotasGrupo";
+import GenerarLinkPago from "./pages/Socios/GenerarLinkPago";
+import VerSaldosExtra from "./pages/Socios/VerSaldosExtra";
+import VerDatosSocio from "./pages/Socios/VerDatosSocio";
+
+import "./styles/ModernUI.css";
+import "./components/Sidebar.css";
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
+
+function AppRoutes() {
+  const token = localStorage.getItem("token");
+  const socioToken = localStorage.getItem("socioToken");
+
+  return (
+    <Routes>
+      {/* Logins */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/socio/login" element={<LoginSocio />} />
+
+      {/* Rutas según tipo de usuario */}
+      {token ? (
+        // Usuario ADMIN
+        <Route
+          path="/*"
+          element={
+            <RutaPrivada>
+              <LayoutPrivado />
+            </RutaPrivada>
+          }
+        />
+      ) : socioToken ? (
+        // Usuario SOCIO
+        <Route path="/*" element={<LayoutSocio />} />
+      ) : (
+        // No logueado, redirige a login
+        <Route path="/*" element={<Login />} />
+      )}
+    </Routes>
+  );
+}
+
+function LayoutPrivado() {
+  return (
+    <div className="app-layout">
+      <Sidebar />
+      <div className="main-content">
+        <TopBar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/socios/ingresar" element={<IngresarSocio />} />
+          <Route path="/socios/gestionar" element={<GestionarSocios />} />
+          <Route path="/grupofamiliar/crear" element={<CrearGrupoFamiliar />} />
+          <Route path="/grupofamiliar/gestionar" element={<GestionarGrupoFamiliar />} />
+          <Route path="/cuotas/generar-mensual" element={<GenerarMensual />} />
+          <Route path="/cuotas/generar-individual" element={<GenerarIndividual />} />
+          <Route path="/cuotas" element={<ControlCuotas />} />
+          <Route path="/cuotas/imprimir" element={<ImprimirCuotas />} />
+          <Route path="/cuotas/mercadopago" element={<GenerarLinksMasivosMP />} />
+          <Route path="/pagos-rapidos" element={<PagosRapidos />} />
+          <Route path="/informes/morosidad" element={<InformeMorosidadConsolidada />} />
+          <Route path="/informes/cuotas" element={<InformeCuotasFiltros />} />
+          <Route path="/usuarios/crear" element={<CrearUsuario />} />
+        </Routes>
+      </div>
+    </div>
+  );
+}
+
+function LayoutSocio() {
+  return (
+    <Routes>
+      <Route path="/socio/perfil" element={<PerfilSocio />} />
+      <Route path="/socio/perfil/datos" element={<VerDatosSocio />} />
+      <Route path="/socio/perfil/cambiar-clave" element={<CambiarClaveSocio />} />
+      <Route path="/socio/perfil/grupo" element={<VerGrupoFamiliar />} />
+      <Route path="/socio/perfil/cuotas" element={<VerCuotasGrupo />} />
+      <Route path="/socio/perfil/link-pago" element={<GenerarLinkPago />} />
+      <Route path="/socio/perfil/saldos" element={<VerSaldosExtra />} />
+    </Routes>
+  );
+}

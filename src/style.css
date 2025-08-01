@@ -1,0 +1,16 @@
+.main-content {
+  margin-left: 220px;
+  padding: 28px 22px 22px 22px;
+  min-height: 100vh;
+  background: #f8f8f9;
+  transition: margin-left 0.2s;
+}
+.sidebar.collapsed ~ .main-content {
+  margin-left: 58px;
+}
+@media (max-width: 720px) {
+  .main-content {
+    margin-left: 48px;
+    padding: 18px 6vw;
+  }
+}

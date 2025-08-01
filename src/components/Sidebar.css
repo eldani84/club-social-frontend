@@ -1,0 +1,139 @@
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 220px;
+  height: 100vh;
+  background: #b91c1c;
+  color: #fff;
+  z-index: 100;
+  padding-top: 24px;
+  box-shadow: 2px 0 16px #0002;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  padding: 0 24px 16px 24px;
+  border-bottom: 1px solid #fff3;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0 12px;
+  margin: 0;
+}
+
+.sidebar li {
+  margin-bottom: 6px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.sidebar li:hover,
+.sidebar li.active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.sidebar a {
+  color: #f5f5f5;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sidebar a.active {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 5px;
+  padding: 5px 8px;
+  color: #ffffff;
+}
+
+.sidebar .submenu {
+  margin-left: 18px;
+  margin-top: 4px;
+  border-left: 2px solid #fff2;
+  padding-left: 10px;
+}
+
+.sidebar .submenu li {
+  font-size: 0.75rem;
+  margin-bottom: 2px;
+  padding: 4px 0;
+  color: #fcdcdc;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  margin-bottom: 12px;
+}
+
+.sidebar-logo {
+  max-width: 100px;
+  height: auto;
+  margin: 6px 0;
+}
+
+.collapse-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.15rem;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.chev {
+  transition: transform 0.2s;
+  font-size: 0.9em;
+}
+
+.rot {
+  transform: rotate(180deg);
+}
+
+/* Si está colapsado */
+.sidebar.collapsed {
+  width: 60px;
+}
+
+.sidebar.collapsed .sidebar-title,
+.sidebar.collapsed .submenu,
+.sidebar.collapsed span:not(.chev),
+.sidebar.collapsed .chev {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 850px) {
+  .sidebar {
+    width: 60px;
+    overflow-x: hidden;
+    padding-top: 15px;
+  }
+
+  .sidebar-title,
+  .sidebar ul span,
+  .sidebar ul .submenu {
+    display: none;
+  }
+}
+
+/* Input radio con color institucional */
+input[type="radio"] {
+  accent-color: #b91c1c;
+  width: 16px;
+  height: 16px;
+}

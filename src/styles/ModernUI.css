@@ -1,0 +1,482 @@
+:root {
+  --primary: #da1d25;
+  --primary-light: #ffedef;
+  --primary-dark: #a31117;
+  --white: #fff;
+  --gray-bg: #fafbfc;
+  --gray-line: #eaeaea;
+  --gray-table: #f8f9fa;
+  --gray-hover: #fff1f3;
+  --font-main: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-main);
+  font-size: 10pt;
+  background: var(--gray-bg);
+  color: #232323;
+  letter-spacing: .01em;
+}
+
+.main-content {
+  padding: 16px;
+  padding-left: 220px; /* 👈 deja espacio para el menú lateral */
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--gray-bg);
+}
+
+/* Títulos */
+.form-section-title,
+.modern-form-title,
+form h2 {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--primary-dark);
+  margin-bottom: 16px;
+  text-shadow: none;
+}
+
+/* Contenedor principal */
+.form-modern,
+form {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px #da1d2512;
+  border: 1.2px solid var(--primary-light);
+  padding: 24px 20px;
+  margin-bottom: 32px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Inputs y selects */
+input,
+select,
+textarea {
+  font-size: 10pt;
+  font-weight: 400;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1.5px solid var(--gray-line);
+  margin-bottom: 10px;
+  background: var(--gray-table);
+  color: #252525;
+  outline: none;
+  box-sizing: border-box;
+  width: 25%;
+  transition: border-color .15s, box-shadow .13s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary);
+  background: #fff;
+  box-shadow: 0 2px 6px #da1d2522;
+}
+
+/* Labels */
+label {
+  font-size: 10pt;
+  font-weight: 400;
+  color: var(--primary-dark);
+  display: block;
+  margin-bottom: 5px;
+}
+
+/* Botones comunes (formulario principal) */
+button,
+.modern-btn {
+  font-size: 10pt;
+  font-weight: 400;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  margin-top: 8px;
+  box-shadow: 0 2px 8px #da1d2522;
+  transition: background 0.13s, transform .13s;
+  cursor: pointer;
+}
+button:hover,
+.modern-btn:hover {
+  background: var(--primary-dark);
+  transform: scale(1.04);
+}
+
+/* Botones pequeños tipo ícono */
+button.icon {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  border-radius: 6px;
+  padding: 3px 6px;
+  font-size: 13px;
+  box-shadow: 0 2px 6px #0001;
+}
+button.icon:hover {
+  background: var(--primary-dark);
+  color: white;
+  transform: scale(1.12);
+}
+
+/* Tabla moderna */
+.modern-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10pt;
+  background: var(--white);
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+.modern-table thead {
+  background: var(--primary);
+  color: white;
+}
+
+.modern-table th,
+.modern-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--gray-line);
+  white-space: nowrap;
+  font-weight: 400;
+}
+
+.modern-table tbody tr:hover {
+  background: var(--gray-hover);
+}
+
+.modern-table th.sortable {
+  cursor: pointer;
+}
+.modern-table th.sortable:hover {
+  background: var(--primary-dark);
+}
+
+/* Barra de filtros */
+.filtros-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filtros-bar input,
+.filtros-bar select {
+  padding: 6px 10px;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  font-size: 10pt;
+  min-width: 100px;
+  max-width: 160px;
+  width: auto;
+  flex: 0 0 auto;
+}
+
+.filtros-bar input:focus,
+.filtros-bar select:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+
+/* Celdas en edición */
+.input-cell {
+  width: 100%;
+  padding: 5px 6px;
+  font-size: 10pt;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+.input-cell:focus {
+  border-color: var(--primary);
+  outline: none;
+}
+
+/* Responsive para móviles */
+@media (max-width: 850px) {
+  .main-content {
+    padding-left: 60px;
+    padding-right: 12px;
+  }
+
+  .modern-table th,
+  .modern-table td {
+    font-size: 9pt;
+  }
+
+  .form-modern,
+  form {
+    padding: 12px 14px;
+  }
+}
+/* Botones de acción dentro de la tabla */
+.btn-icon {
+  background: transparent;
+  border: none;
+  padding: 2px 4px;
+  font-size: 14px;          /* 👈 Podés ajustar aún más si querés */
+  cursor: pointer;
+  color: #444;              /* Color base neutro */
+  transition: color 0.2s ease;
+}
+
+.btn-icon:hover {
+  color: #b91c1c;           /* Rojo institucional al pasar el mouse */
+}
+
+.btn-icon:focus {
+  outline: none;
+}
+/* Layout base */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  transition: width 0.3s ease;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 16px;
+  margin-left: 220px;
+  transition: margin-left 0.3s ease;
+}
+
+/* Si más adelante querés usar un sidebar colapsable */
+.sidebar.collapsed {
+  width: 60px;
+}
+
+.sidebar.collapsed + .main-content {
+  margin-left: 60px;
+}
+.input-modern {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.75rem;  /* Letra más chica */
+  height: 32px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.gestion-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 32px 0 rgba(200,0,0,0.09);
+  padding: 2.2rem 1.5rem 1.5rem 1.5rem;
+}
+
+.form-section-title {
+  font-size: 1.1rem;
+  color: #d32f2f;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+  text-align: left;
+}
+
+.filtros-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  margin-bottom: 1.2rem;
+  max-width: 900px;         /* 👈 Nuevo: limita el ancho total de la barra */
+  margin-left: auto;        /* 👈 Centra horizontalmente */
+  margin-right: auto;
+}
+
+.filtros-bar input,
+.filtros-bar select {
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #ececec;
+  background: #f8f8f8;
+  min-width: 140px;         /* 👈 Nuevo: ancho mínimo más compacto */
+  font-size: 0.95rem;
+  flex: 0 0 auto;           /* 👈 No se estiran */
+  width: auto;
+}
+
+.filtros-bar input:focus,
+.filtros-bar select:focus {
+  outline: 2px solid #d32f2f66;
+  background: #fff;
+}
+
+.tabla-moderna-wrapper {
+  overflow-x: auto;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px 0 rgba(220,0,0,0.07);
+  background: #fafbfc;
+}
+
+.tabla-moderna {
+  min-width: 1200px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.98rem;
+  background: transparent;
+}
+
+.tabla-moderna th,
+.tabla-moderna td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1.5px solid #f1f1f1;
+  white-space: nowrap;
+}
+
+.tabla-moderna th {
+  background: #e53935;
+  color: #fff;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.tabla-moderna th:hover {
+  background: #b71c1c;
+}
+
+.tabla-moderna tr:nth-child(even) td {
+  background: #fff5f5;
+}
+
+.tabla-moderna tr:hover td {
+  background: #ffebee;
+}
+
+@media (max-width: 800px) {
+  .tabla-moderna th,
+  .tabla-moderna td {
+    padding: 8px 5px;
+    font-size: 0.91rem;
+  }
+
+  .filtros-bar {
+    gap: 0.5rem;
+  }
+
+  .filtros-bar input,
+  .filtros-bar select {
+    min-width: 100px;
+    font-size: 0.85rem;
+  }
+}
+/* Botones de acción dentro de la tabla */
+.btn-icon {
+  background: transparent;
+  border: none;
+  padding: 2px 4px;
+  font-size: 14px;          /* 👈 Podés ajustar aún más si querés */
+  cursor: pointer;
+  color: #444;              /* Color base neutro */
+  transition: color 0.2s ease;
+}
+
+.btn-icon:hover {
+  color: #b91c1c;           /* Rojo institucional al pasar el mouse */
+}
+
+.btn-icon:focus {
+  outline: none;
+}
+.topbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #b91c1c;
+  color: white;
+  padding: 8px 16px;
+  font-size: 12px;
+}
+
+.usuario-nombre {
+  font-weight: 400;
+}
+
+.btn-cerrar-sesion {
+  background-color: white;
+  color: #b91c1c;
+  font-size: 12px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-cerrar-sesion:hover {
+  background-color: #f8d7da;
+}
+/* Asegura visibilidad del video */
+video {
+  display: block;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background-color: black;
+  max-width: 100%;
+}
+
+/* Asegura visibilidad del canvas (aunque lo tengas oculto) */
+canvas {
+  display: none;
+}
+
+/* Asegura que los botones no se colapsen ni se oculten */
+button {
+  display: inline-block;
+}
+.perfil-socio-app {
+  padding: 1rem;
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.perfil-socio-app .titulo {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+.info-basica {
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.grid-opciones {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.btn-opcion {
+  background-color: var(--primary, #c8102e);
+  color: white;
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  text-decoration: none;
+  font-weight: 500;
+  display: block;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.btn-opcion:hover {
+  background-color: #a00;
+}

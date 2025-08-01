@@ -1,0 +1,37 @@
+.sidebar-socio {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #da1d25;
+  padding: 10px 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 50;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-socio a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 11px;
+  color: #fff;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-socio a svg {
+  font-size: 18px;
+  margin-bottom: 2px;
+}
+
+.sidebar-socio a.active {
+  color: #fff;
+  font-weight: bold;
+  transform: scale(1.1);
+}
+
+.sidebar-socio a:hover {
+  color: #ffcdd2;
+}
