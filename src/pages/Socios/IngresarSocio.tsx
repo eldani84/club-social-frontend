@@ -24,7 +24,7 @@ export default function IngresarSocio() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const [camaraActiva, setCamaraActiva] = useState(false);
+  const [, setCamaraActiva] = useState(false);
   const [categorias, setCategorias] = useState<any[]>([]);
   const [formasPago, setFormasPago] = useState<any[]>([]);
 

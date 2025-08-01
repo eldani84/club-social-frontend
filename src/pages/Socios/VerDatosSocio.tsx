@@ -22,18 +22,18 @@ interface Socio {
 }
 
 export default function VerDatosSocio() {
-  const { user } = useAuth();
-  console.log(user?.nombre);
+  const { usuario } = useAuth();
+  console.log(usuario?.nombre);
   const [socio, setSocio] = useState<Socio | null>(null);
 
   useEffect(() => {
-    if (user?.id) {
-      fetch(`http://localhost:3000/api/socios/${user.id}`)
+    if (usuario?.id) {
+      fetch(`http://localhost:3000/api/socios/${usuario.id}`)
         .then((res) => res.json())
         .then((data) => setSocio(data))
         .catch((err) => console.error("Error al obtener datos del socio:", err));
     }
-  }, [user]);
+  }, [usuario]);
 
   if (!socio) return <p>Cargando datos del socio...</p>;
 

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
+
 interface Usuario {
   id: number;
   nombre: string;
@@ -19,6 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("token")
   );
+
   const [usuario, setUsuario] = useState<Usuario | null>(
     localStorage.getItem("usuario")
       ? JSON.parse(localStorage.getItem("usuario") || "")

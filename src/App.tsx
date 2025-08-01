@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/auth";
+import { AuthProvider } from "./context/auth";
 import RutaPrivada from "./components/RutaPrivada";
 
 import Sidebar from "./components/Sidebar";
