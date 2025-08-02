@@ -20,19 +20,21 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     try {
       const res = await axios.post<LoginResponse>(
-        "http://localhost:3000/api/auth/login",
+        `${API_URL}/auth/login`,
         { usuario, password }
       );
 
       const { token, usuario: usuarioData } = res.data;
       login(token, usuarioData);
-      navigate("/"); // Redirige correctamente
+      navigate("/");
     } catch (err: any) {
       setError(
         err.response?.data?.error || "Error al iniciar sesión. Intente nuevamente."

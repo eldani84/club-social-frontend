@@ -6,7 +6,7 @@ export default function LoginSocio() {
   const [dni, setDni] = useState("");
   const [clave, setClave] = useState(""); // CAMBIO: antes era "password"
   const [error, setError] = useState("");
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -15,12 +15,13 @@ export default function LoginSocio() {
       setError("Debe ingresar DNI y contraseña");
       return;
     }
-
+const API_URL = import.meta.env.VITE_API_URL;
     try {
-      const res = await fetch("http://localhost:3000/api/socios/auth/login", {
+  
+      const res = await fetch(`${API_URL}/socios/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dni, clave }), // CAMBIO: se envía como "clave"
+        body: JSON.stringify({ dni, clave }),
       });
 
       const data = await res.json();
