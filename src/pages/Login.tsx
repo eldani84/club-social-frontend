@@ -1,7 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/auth";
-import { useNavigate } from "react-router-dom";
 
 interface LoginResponse {
   token: string;
@@ -18,7 +17,6 @@ export default function Login() {
   const [error, setError] = useState("");
 
   const { login } = useAuth();
-  const navigate = useNavigate();
 
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -34,7 +32,10 @@ export default function Login() {
 
       const { token, usuario: usuarioData } = res.data;
       login(token, usuarioData);
-      navigate("/");
+
+      // Redirección forzada para evitar problemas de renderización
+      window.location.href = "/";
+
     } catch (err: any) {
       setError(
         err.response?.data?.error || "Error al iniciar sesión. Intente nuevamente."

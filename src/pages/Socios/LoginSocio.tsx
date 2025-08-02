@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 export default function LoginSocio() {
-  const navigate = useNavigate();
   const [dni, setDni] = useState("");
   const [clave, setClave] = useState(""); // CAMBIO: antes era "password"
   const [error, setError] = useState("");
@@ -15,9 +13,10 @@ export default function LoginSocio() {
       setError("Debe ingresar DNI y contraseña");
       return;
     }
-const API_URL = import.meta.env.VITE_API_URL;
+
+    const API_URL = import.meta.env.VITE_API_URL;
+    
     try {
-  
       const res = await fetch(`${API_URL}/socios/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -35,7 +34,8 @@ const API_URL = import.meta.env.VITE_API_URL;
       localStorage.setItem("socioToken", data.token);
       localStorage.setItem("socioData", JSON.stringify(data.socio));
 
-      navigate("/socio/perfil"); // no /socio solo
+      // Redirigir forzando recarga completa (soluciona problema en móviles y render inicial)
+      window.location.href = "/socio/perfil";
 
     } catch (err) {
       console.error("Error en login:", err);
