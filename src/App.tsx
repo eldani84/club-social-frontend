@@ -22,7 +22,7 @@ import InformeMorosidadConsolidada from "./pages/Informes/InformeMorosidadConsol
 import InformeCuotasFiltros from "./pages/Informes/InformeCuotasFiltros";
 import CrearUsuario from "./pages/Usuarios/CrearUsuario";
 
-// Rutas para SOCIO
+// SOCIO
 import LoginSocio from "./pages/Socios/LoginSocio";
 import PerfilSocioDashboard from "./pages/Socios/PerfilSocioDashboard";
 import CambiarClaveSocio from "./pages/Socios/CambiarClaveSocio";
@@ -33,7 +33,6 @@ import VerSaldosExtra from "./pages/Socios/VerSaldosExtra";
 import VerDatosSocio from "./pages/Socios/VerDatosSocio";
 
 import "./styles/ModernUI.css";
-import "./components/Sidebar.css";
 
 export default function App() {
   return (
@@ -60,7 +59,6 @@ function AppRoutes() {
 
   return (
     <Routes>
-      {/* Redirección desde la raíz */}
       <Route
         path="/"
         element={
@@ -78,7 +76,7 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/socio/login" element={<LoginSocio />} />
 
-      {/* Rutas protegidas según tipo de token */}
+      {/* Admin (privado) */}
       {token && (
         <Route
           path="/*"
@@ -90,7 +88,10 @@ function AppRoutes() {
         />
       )}
 
-      {socioToken && <Route path="/socio/*" element={<LayoutSocio />} />}
+      {/* Socio (modo app sin sidebar fijo) */}
+      {socioToken && (
+        <Route path="/socio/*" element={<LayoutSocio />} />
+      )}
     </Routes>
   );
 }
