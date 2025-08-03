@@ -24,7 +24,7 @@ import CrearUsuario from "./pages/Usuarios/CrearUsuario";
 
 // Rutas para SOCIO
 import LoginSocio from "./pages/Socios/LoginSocio";
-import PerfilSocio from "./pages/Socios/PerfilSocio";
+import PerfilSocioDashboard from "./pages/Socios/PerfilSocioDashboard";
 import CambiarClaveSocio from "./pages/Socios/CambiarClaveSocio";
 import VerGrupoFamiliar from "./pages/Socios/VerGrupoFamiliar";
 import VerCuotasGrupo from "./pages/Socios/VerCuotasGrupo";
@@ -125,7 +125,7 @@ function LayoutPrivado() {
 function LayoutSocio() {
   return (
     <Routes>
-      <Route path="/socio/perfil" element={<PerfilSocio />} />
+      <Route path="/socio/perfil" element={<PerfilSocioDashboard />} />
       <Route path="/socio/perfil/datos" element={<VerDatosSocio />} />
       <Route path="/socio/perfil/cambiar-clave" element={<CambiarClaveSocio />} />
       <Route path="/socio/perfil/grupo" element={<VerGrupoFamiliar />} />
