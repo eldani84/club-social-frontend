@@ -3,5 +3,5 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: './', // importante para Vercel o GitHub Pages
+  base: '/', // importante para Vercel o GitHub Pages
 })
