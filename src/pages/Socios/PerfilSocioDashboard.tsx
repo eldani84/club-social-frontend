@@ -7,6 +7,13 @@ export default function PerfilSocioDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+  const token = localStorage.getItem("socioToken");
+  if (!token) {
+    window.location.href = "/socio/login";
+  }
+  }, []);
+
+  useEffect(() => {
     const socioData = localStorage.getItem("socioData");
     if (socioData) {
       try {
