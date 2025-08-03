@@ -78,28 +78,24 @@ function AppRoutes() {
       <Route path="/socio/login" element={<LoginSocio />} />
 
       {/* Admin (privado) */}
-      {token && (
-        <Route
-          path="/*"
-          element={
-            <RutaPrivada>
-              <LayoutPrivado />
-            </RutaPrivada>
-          }
-        />
-      )}
+      <Route
+        path="/*"
+        element={
+          <RutaPrivada>
+            <LayoutPrivado />
+          </RutaPrivada>
+        }
+      />
 
       {/* Socio (modo app protegido) */}
-      {socioToken && (
-        <Route
-          path="/socio/*"
-          element={
-            <RutaPrivadaSocio>
-              <LayoutSocio />
-            </RutaPrivadaSocio>
-          }
-        />
-      )}
+      <Route
+        path="/socio/*"
+        element={
+          <RutaPrivadaSocio>
+            <LayoutSocio />
+          </RutaPrivadaSocio>
+        }
+      />
     </Routes>
   );
 }
@@ -111,20 +107,20 @@ function LayoutPrivado() {
       <div className="main-content">
         <TopBar />
         <Routes>
-          <Route path="/dashboard" element={<Home />} />
-          <Route path="/socios/ingresar" element={<IngresarSocio />} />
-          <Route path="/socios/gestionar" element={<GestionarSocios />} />
-          <Route path="/grupofamiliar/crear" element={<CrearGrupoFamiliar />} />
-          <Route path="/grupofamiliar/gestionar" element={<GestionarGrupoFamiliar />} />
-          <Route path="/cuotas/generar-mensual" element={<GenerarMensual />} />
-          <Route path="/cuotas/generar-individual" element={<GenerarIndividual />} />
-          <Route path="/cuotas" element={<ControlCuotas />} />
-          <Route path="/cuotas/imprimir" element={<ImprimirCuotas />} />
-          <Route path="/cuotas/mercadopago" element={<GenerarLinksMasivosMP />} />
-          <Route path="/pagos-rapidos" element={<PagosRapidos />} />
-          <Route path="/informes/morosidad" element={<InformeMorosidadConsolidada />} />
-          <Route path="/informes/cuotas" element={<InformeCuotasFiltros />} />
-          <Route path="/usuarios/crear" element={<CrearUsuario />} />
+          <Route path="dashboard" element={<Home />} />
+          <Route path="socios/ingresar" element={<IngresarSocio />} />
+          <Route path="socios/gestionar" element={<GestionarSocios />} />
+          <Route path="grupofamiliar/crear" element={<CrearGrupoFamiliar />} />
+          <Route path="grupofamiliar/gestionar" element={<GestionarGrupoFamiliar />} />
+          <Route path="cuotas/generar-mensual" element={<GenerarMensual />} />
+          <Route path="cuotas/generar-individual" element={<GenerarIndividual />} />
+          <Route path="cuotas" element={<ControlCuotas />} />
+          <Route path="cuotas/imprimir" element={<ImprimirCuotas />} />
+          <Route path="cuotas/mercadopago" element={<GenerarLinksMasivosMP />} />
+          <Route path="pagos-rapidos" element={<PagosRapidos />} />
+          <Route path="informes/morosidad" element={<InformeMorosidadConsolidada />} />
+          <Route path="informes/cuotas" element={<InformeCuotasFiltros />} />
+          <Route path="usuarios/crear" element={<CrearUsuario />} />
         </Routes>
       </div>
     </div>
@@ -134,13 +130,13 @@ function LayoutPrivado() {
 function LayoutSocio() {
   return (
     <Routes>
-      <Route path="/socio/perfil" element={<PerfilSocioDashboard />} />
-      <Route path="/socio/perfil/datos" element={<VerDatosSocio />} />
-      <Route path="/socio/perfil/cambiar-clave" element={<CambiarClaveSocio />} />
-      <Route path="/socio/perfil/grupo" element={<VerGrupoFamiliar />} />
-      <Route path="/socio/perfil/cuotas" element={<VerCuotasGrupo />} />
-      <Route path="/socio/perfil/link-pago" element={<GenerarLinkPago />} />
-      <Route path="/socio/perfil/saldos" element={<VerSaldosExtra />} />
+      <Route path="perfil" element={<PerfilSocioDashboard />} />
+      <Route path="perfil/datos" element={<VerDatosSocio />} />
+      <Route path="perfil/cambiar-clave" element={<CambiarClaveSocio />} />
+      <Route path="perfil/grupo" element={<VerGrupoFamiliar />} />
+      <Route path="perfil/cuotas" element={<VerCuotasGrupo />} />
+      <Route path="perfil/link-pago" element={<GenerarLinkPago />} />
+      <Route path="perfil/saldos" element={<VerSaldosExtra />} />
     </Routes>
   );
 }
