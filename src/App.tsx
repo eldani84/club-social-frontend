@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { AuthProvider } from "./context/auth";
 import RutaPrivada from "./components/RutaPrivada";
+import RutaPrivadaSocio from "./components/RutaPrivadaSocio";
 
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
@@ -88,9 +89,16 @@ function AppRoutes() {
         />
       )}
 
-      {/* Socio (modo app sin sidebar fijo) */}
+      {/* Socio (modo app protegido) */}
       {socioToken && (
-        <Route path="/socio/*" element={<LayoutSocio />} />
+        <Route
+          path="/socio/*"
+          element={
+            <RutaPrivadaSocio>
+              <LayoutSocio />
+            </RutaPrivadaSocio>
+          }
+        />
       )}
     </Routes>
   );
