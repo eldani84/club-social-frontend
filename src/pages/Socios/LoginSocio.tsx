@@ -2,9 +2,9 @@ import { useState } from "react";
 
 export default function LoginSocio() {
   const [dni, setDni] = useState("");
-  const [clave, setClave] = useState(""); // CAMBIO: antes era "password"
+  const [clave, setClave] = useState("");
   const [error, setError] = useState("");
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -15,35 +15,39 @@ export default function LoginSocio() {
     }
 
     const API_URL = import.meta.env.VITE_API_URL;
-    
+
     try {
-  const res = await fetch(`${API_URL}/socios/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ dni, clave }),
-  });
+      const res = await fetch(`${API_URL}/socios/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dni, clave }),
+      });
 
-  const data = await res.json();
+      const data = await res.json();
 
-  if (!res.ok) {
-    setError(data.error || "Error al iniciar sesión");
-    return;
-  }
+      if (!res.ok) {
+        setError(data.error || "Error al iniciar sesión");
+        return;
+      }
 
-  // 🔴 BORRAMOS tokens de admin si quedaban de antes
-  localStorage.removeItem("token");
-  localStorage.removeItem("usuario");
+      // Limpieza de posibles tokens previos (admin)
+      localStorage.removeItem("token");
+      localStorage.removeItem("usuario");
 
-  // Guardar en localStorage
-  localStorage.setItem("socioToken", data.token);
-  localStorage.setItem("socioData", JSON.stringify(data.socio));
+      // Guardar token y datos del socio
+      localStorage.setItem("socioToken", data.token);
+      localStorage.setItem("socioData", JSON.stringify(data.socio));
 
-  window.location.href = "/socio/perfil";
-} catch (err) {
-  console.error("Error en login:", err);
-  setError("Error al conectar con el servidor");
-}
+      // Verificación en consola (útil en desarrollo)
+      console.log("✅ socioToken:", data.token);
+      console.log("✅ socioData:", data.socio);
 
+      // Redirección segura al dashboard del socio
+      window.location.href = "/socio/perfil";
+    } catch (err) {
+      console.error("Error en login:", err);
+      setError("Error al conectar con el servidor");
+    }
   };
 
   return (
@@ -57,14 +61,16 @@ export default function LoginSocio() {
               value={dni}
               onChange={(e) => setDni(e.target.value)}
               className="border p-1 text-sm w-full"
+              required
             />
           </label>
           <label>Contraseña
             <input
               type="password"
               value={clave}
-              onChange={(e) => setClave(e.target.value)} // CAMBIO
+              onChange={(e) => setClave(e.target.value)}
               className="border p-1 text-sm w-full"
+              required
             />
           </label>
           {error && <div className="text-red-600 text-xs">{error}</div>}
