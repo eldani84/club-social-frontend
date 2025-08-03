@@ -2,6 +2,7 @@
   padding: 1rem;
   background: #f9f9f9;
   min-height: 100vh;
+  font-family: sans-serif;
 }
 
 .bienvenida {
@@ -10,12 +11,12 @@
 }
 
 .bienvenida-nombre {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 600;
 }
 
 .bienvenida-dni {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: #555;
 }
 
@@ -35,8 +36,19 @@
   font-weight: 500;
   text-decoration: none;
   transition: background 0.2s;
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .boton-app:hover {
   background-color: #b3181e;
+  transform: scale(1.01);
+}
+
+@media (min-width: 640px) {
+  .botonera-app {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
 }

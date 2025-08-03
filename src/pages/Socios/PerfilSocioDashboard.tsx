@@ -40,13 +40,13 @@ export default function PerfilSocioDashboard() {
           </div>
 
           <div className="botonera-app">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-              <Link to="/socio/perfil/datos" className="modern-btn">📄 Ver Mis Datos</Link>
-              <Link to="/socio/perfil/cambiar-clave" className="modern-btn">🔒 Cambiar Contraseña</Link>
-              <Link to="/socio/perfil/grupo" className="modern-btn">👨‍👩‍👧‍👦 Grupo Familiar</Link>
-              <Link to="/socio/perfil/cuotas" className="modern-btn">💰 Cuotas y Pagos</Link>
-              <Link to="/socio/perfil/link-pago" className="modern-btn">💳 Generar Link de Pago</Link>
-              <Link to="/socio/perfil/saldos" className="modern-btn">🧾 Saldos Extras</Link>
+            <div className="botonera-app">
+              <Link to="/socio/perfil/datos" className="boton-app">📄 Ver Mis Datos</Link>
+              <Link to="/socio/perfil/cambiar-clave" className="boton-app">🔒 Cambiar Contraseña</Link>
+              <Link to="/socio/perfil/grupo" className="boton-app">👨‍👩‍👧‍👦 Grupo Familiar</Link>
+              <Link to="/socio/perfil/cuotas" className="boton-app">💰 Cuotas y Pagos</Link>
+              <Link to="/socio/perfil/link-pago" className="boton-app">💳 Generar Link de Pago</Link>
+              <Link to="/socio/perfil/saldos" className="boton-app">🧾 Saldos Extras</Link>
             </div>
           </div>
         </>
