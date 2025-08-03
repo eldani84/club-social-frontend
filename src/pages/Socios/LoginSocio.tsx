@@ -17,30 +17,33 @@ export default function LoginSocio() {
     const API_URL = import.meta.env.VITE_API_URL;
     
     try {
-      const res = await fetch(`${API_URL}/socios/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dni, clave }),
-      });
+  const res = await fetch(`${API_URL}/socios/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ dni, clave }),
+  });
 
-      const data = await res.json();
+  const data = await res.json();
 
-      if (!res.ok) {
-        setError(data.error || "Error al iniciar sesión");
-        return;
-      }
+  if (!res.ok) {
+    setError(data.error || "Error al iniciar sesión");
+    return;
+  }
 
-      // Guardar en localStorage
-      localStorage.setItem("socioToken", data.token);
-      localStorage.setItem("socioData", JSON.stringify(data.socio));
+  // 🔴 BORRAMOS tokens de admin si quedaban de antes
+  localStorage.removeItem("token");
+  localStorage.removeItem("usuario");
 
-      // Redirigir forzando recarga completa (soluciona problema en móviles y render inicial)
-      window.location.href = "/socio/perfil";
+  // Guardar en localStorage
+  localStorage.setItem("socioToken", data.token);
+  localStorage.setItem("socioData", JSON.stringify(data.socio));
 
-    } catch (err) {
-      console.error("Error en login:", err);
-      setError("Error al conectar con el servidor");
-    }
+  window.location.href = "/socio/perfil";
+} catch (err) {
+  console.error("Error en login:", err);
+  setError("Error al conectar con el servidor");
+}
+
   };
 
   return (

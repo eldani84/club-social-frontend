@@ -20,25 +20,30 @@ export default function Login() {
   const API_URL = import.meta.env.VITE_API_URL;
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+      e.preventDefault();
+      setError("");
 
-    try {
-      const res = await axios.post<LoginResponse>(
-        `${API_URL}/auth/login`,
-        { usuario, password }
-      );
+      try {
+        // 🔴 BORRAMOS tokens de socio por si quedaron de antes
+        localStorage.removeItem("socioToken");
+        localStorage.removeItem("socioData");
 
-      const { token, usuario: usuarioData } = res.data;
-      login(token, usuarioData);
+        const res = await axios.post<LoginResponse>(
+          `${API_URL}/auth/login`,
+          { usuario, password }
+        );
 
-      window.location.href = "/";
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error || "Error al iniciar sesión. Intente nuevamente."
-      );
-    }
-  };
+        const { token, usuario: usuarioData } = res.data;
+        login(token, usuarioData);
+
+        window.location.href = "/"; // el redirect se decide en App.tsx
+      } catch (err: any) {
+        setError(
+          err.response?.data?.error || "Error al iniciar sesión. Intente nuevamente."
+        );
+      }
+    };
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

@@ -64,10 +64,10 @@ function AppRoutes() {
       <Route
         path="/"
         element={
-          socioToken ? (
-            <Navigate to="/socio/perfil" replace />
-          ) : token ? (
+          token ? (
             <Navigate to="/dashboard" replace />
+          ) : socioToken ? (
+            <Navigate to="/socio/perfil" replace />
           ) : (
             <Navigate to="/login" replace />
           )
