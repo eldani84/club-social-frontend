@@ -50,7 +50,7 @@ export default function Login() {
         className="bg-white p-8 rounded shadow-md w-full max-w-sm"
       >
         <h2 className="text-xl font-semibold mb-4 text-center text-red-700">
-          Iniciar sesión
+          Iniciar sesión-ADMIN
         </h2>
 
         {error && (
