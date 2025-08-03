@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { AuthProvider } from "./context/auth";
 import RutaPrivada from "./components/RutaPrivada";
@@ -56,16 +56,30 @@ function AppRoutes() {
     setLoading(false);
   }, []);
 
-  if (loading) return null; // opcional: agregar spinner si querés
+  if (loading) return null;
 
   return (
     <Routes>
+      {/* Redirección desde la raíz */}
+      <Route
+        path="/"
+        element={
+          socioToken ? (
+            <Navigate to="/socio/perfil" replace />
+          ) : token ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
       {/* Logins */}
       <Route path="/login" element={<Login />} />
       <Route path="/socio/login" element={<LoginSocio />} />
 
-      {/* Rutas según tipo de usuario */}
-      {token ? (
+      {/* Rutas protegidas según tipo de token */}
+      {token && (
         <Route
           path="/*"
           element={
@@ -74,11 +88,9 @@ function AppRoutes() {
             </RutaPrivada>
           }
         />
-      ) : socioToken ? (
-        <Route path="/*" element={<LayoutSocio />} />
-      ) : (
-        <Route path="/*" element={<Login />} />
       )}
+
+      {socioToken && <Route path="/socio/*" element={<LayoutSocio />} />}
     </Routes>
   );
 }
@@ -90,7 +102,7 @@ function LayoutPrivado() {
       <div className="main-content">
         <TopBar />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Home />} />
           <Route path="/socios/ingresar" element={<IngresarSocio />} />
           <Route path="/socios/gestionar" element={<GestionarSocios />} />
           <Route path="/grupofamiliar/crear" element={<CrearGrupoFamiliar />} />

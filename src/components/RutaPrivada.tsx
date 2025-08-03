@@ -7,11 +7,11 @@ interface Props {
 }
 
 export default function RutaPrivada({ children }: Props) {
-  const { usuario } = useAuth();// 👈 antes decía "usuario"
+  const { usuario } = useAuth();
 
-if (!usuario) {
-  return <Navigate to="/login" replace />;
-}
+  if (!usuario) {
+    return <Navigate to="/login" replace />;
+  }
 
   return children;
 }
