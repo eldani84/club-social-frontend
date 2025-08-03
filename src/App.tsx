@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { AuthProvider } from "./context/auth";
 import RutaPrivada from "./components/RutaPrivada";
 
@@ -45,8 +46,17 @@ export default function App() {
 }
 
 function AppRoutes() {
-  const token = localStorage.getItem("token");
-  const socioToken = localStorage.getItem("socioToken");
+  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
+  const [socioToken, setSocioToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    setToken(localStorage.getItem("token"));
+    setSocioToken(localStorage.getItem("socioToken"));
+    setLoading(false);
+  }, []);
+
+  if (loading) return null; // opcional: agregar spinner si querés
 
   return (
     <Routes>
@@ -56,7 +66,6 @@ function AppRoutes() {
 
       {/* Rutas según tipo de usuario */}
       {token ? (
-        // Usuario ADMIN
         <Route
           path="/*"
           element={
@@ -66,10 +75,8 @@ function AppRoutes() {
           }
         />
       ) : socioToken ? (
-        // Usuario SOCIO
         <Route path="/*" element={<LayoutSocio />} />
       ) : (
-        // No logueado, redirige a login
         <Route path="/*" element={<Login />} />
       )}
     </Routes>

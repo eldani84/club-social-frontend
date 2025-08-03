@@ -17,7 +17,6 @@ export default function Login() {
   const [error, setError] = useState("");
 
   const { login } = useAuth();
-
   const API_URL = import.meta.env.VITE_API_URL;
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -33,9 +32,7 @@ export default function Login() {
       const { token, usuario: usuarioData } = res.data;
       login(token, usuarioData);
 
-      // Redirección forzada para evitar problemas de renderización
       window.location.href = "/";
-
     } catch (err: any) {
       setError(
         err.response?.data?.error || "Error al iniciar sesión. Intente nuevamente."
@@ -50,7 +47,7 @@ export default function Login() {
         className="bg-white p-8 rounded shadow-md w-full max-w-sm"
       >
         <h2 className="text-xl font-semibold mb-4 text-center text-red-700">
-          Iniciar sesión-ADMIN
+          Iniciar sesión - ADMIN
         </h2>
 
         {error && (
@@ -91,3 +88,4 @@ export default function Login() {
     </div>
   );
 }
+
