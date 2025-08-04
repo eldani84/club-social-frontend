@@ -94,34 +94,36 @@ export default function VerDatosSocio() {
     }
   };
 
-  const handleFotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !socio) return;
+ const handleFotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (!e.target.files || !socio || !socio.dni) {
+    setMensaje("❌ No se puede subir la foto: faltan datos del socio");
+    return;
+  }
 
+  const formData = new FormData();
+  formData.append("foto", e.target.files[0]);
+  formData.append("dni", socio.dni);
+  console.log("📸 Subiendo foto para DNI:", socio.dni);
+  console.log("🧾 FormData:", formData);
 
-    const formData = new FormData();
-        console.log("📸 Subiendo foto para DNI:", socio.dni);
-        formData.append("dni", socio.dni);
+  try {
+    const res = await fetch(`${API}/autogestion/socios/foto`, {
+      method: "POST",
+      body: formData,
+    });
 
-    formData.append("foto", e.target.files[0]);
-    formData.append("dni", socio.dni);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Error al subir foto");
 
-    try {
-      const res = await fetch(`${API}/autogestion/socios/foto`, {
-        method: "POST",
-        body: formData,
-      });
+    setFotoPreview(`${API}${data.foto_url}`);
+    setSocio({ ...socio, foto_url: data.foto_url });
+    setMensaje("✅ Foto actualizada correctamente.");
+  } catch (err: any) {
+    console.error("❌ Error al subir foto:", err);
+    setMensaje(`❌ ${err.message}`);
+  }
+};
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error al subir foto");
-
-      setFotoPreview(`${API}${data.foto_url}`);
-      setSocio({ ...socio, foto_url: data.foto_url });
-      setMensaje("✅ Foto actualizada correctamente.");
-    } catch (err: any) {
-      console.error("❌ Error al subir foto:", err);
-      setMensaje(`❌ ${err.message}`);
-    }
-  };
 
   if (!socio) return <p>Cargando datos del socio...</p>;
 
