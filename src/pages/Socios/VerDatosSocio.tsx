@@ -20,6 +20,7 @@ interface Socio {
   forma_de_pago: string;
   fecha_alta: string;
   observaciones: string;
+  foto_url?: string;
 }
 
 export default function VerDatosSocio() {
@@ -32,7 +33,21 @@ export default function VerDatosSocio() {
     if (socioData) {
       try {
         const socioParsed = JSON.parse(socioData);
-        setSocio(socioParsed);
+        // Convertir nulls a cadenas vacías
+        const socioConValores: Socio = {
+          ...socioParsed,
+          email: socioParsed.email ?? "",
+          instagram: socioParsed.instagram ?? "",
+          telefono: socioParsed.telefono ?? "",
+          direccion: socioParsed.direccion ?? "",
+          localidad: socioParsed.localidad ?? "",
+          provincia: socioParsed.provincia ?? "",
+          ocupacion: socioParsed.ocupacion ?? "",
+          observaciones: socioParsed.observaciones ?? "",
+          foto_url: socioParsed.foto_url ?? ""
+        };
+
+        setSocio(socioConValores);
       } catch (error) {
         console.error("Error al parsear socioData desde localStorage:", error);
       }
