@@ -48,20 +48,23 @@ export default function IngresarSocio() {
     nro_carnet: "",
   });
 
-  useEffect(() => {
-    fetch("http://localhost:3000/api/categorias")
-      .then((res) => res.json())
-      .then((data) => setCategorias(data))
-      .catch((err) => console.error("Error al cargar categorías", err));
+const API = import.meta.env.VITE_API_URL;
 
-    fetch("http://localhost:3000/api/formas_pago")
-      .then((res) => res.json())
-      .then((data) => setFormasPago(data))
-      .catch((err) => {
-        console.error("Error al cargar formas de pago", err);
-        setFormasPago([]);
-      });
-  }, []);
+useEffect(() => {
+  fetch(`${API}/categorias`)
+    .then((res) => res.json())
+    .then((data) => setCategorias(data))
+    .catch((err) => console.error("Error al cargar categorías", err));
+
+  fetch(`${API}/formas_pago`)
+    .then((res) => res.json())
+    .then((data) => setFormasPago(data))
+    .catch((err) => {
+      console.error("Error al cargar formas de pago", err);
+      setFormasPago([]);
+    });
+}, []);
+
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
