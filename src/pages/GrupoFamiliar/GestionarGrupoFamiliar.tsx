@@ -38,7 +38,7 @@ export default function GestionarGrupoFamiliar() {
   const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    fetch(`${API}/api/socios`)
+    fetch(`${API}/socios`)
       .then(res => res.json())
       .then(setSocios);
   }, []);
@@ -48,7 +48,7 @@ export default function GestionarGrupoFamiliar() {
       setGrupo(null);
       return;
     }
-    fetch(`${API}/api/grupos/por-socio/${socioSeleccionado.id}`)
+    fetch(`${API}/grupos/por-socio/${socioSeleccionado.id}`)
       .then(res => res.json())
       .then(setGrupo)
       .catch(() => setMensaje("Error al cargar el grupo familiar."));
@@ -98,7 +98,7 @@ export default function GestionarGrupoFamiliar() {
   const eliminarIntegrante = async (id_socio: number) => {
     if (!grupo) return;
     if (!window.confirm("¿Seguro que deseas quitar este integrante del grupo?")) return;
-    const res = await fetch(`${API}/api/grupos/${grupo.grupo_id}/eliminar-integrante`, {
+    const res = await fetch(`${API}/grupos/${grupo.grupo_id}/eliminar-integrante`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id_socio })
@@ -106,7 +106,7 @@ export default function GestionarGrupoFamiliar() {
     const data = await res.json();
     if (data.success) {
       setMensaje("Integrante eliminado con éxito.");
-      fetch(`${API}/api/grupos/por-socio/${socioSeleccionado!.id}`)
+      fetch(`${API}/grupos/por-socio/${socioSeleccionado!.id}`)
         .then(res => res.json())
         .then(setGrupo);
       fetch(`${API}/api/socios`)
@@ -119,7 +119,7 @@ export default function GestionarGrupoFamiliar() {
 
   const agregarIntegrante = async (socioAgregar: Socio) => {
     if (!grupo) return;
-    const res = await fetch(`${API}/api/grupos/${grupo.grupo_id}/agregar-integrante`, {
+    const res = await fetch(`${API}/grupos/${grupo.grupo_id}/agregar-integrante`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id_socio: socioAgregar.id })
@@ -129,10 +129,10 @@ export default function GestionarGrupoFamiliar() {
       setMensaje("Integrante agregado con éxito.");
       setNuevoSocioBusqueda("");
       setResultadosAgregar([]);
-      fetch(`${API}/api/grupos/por-socio/${socioSeleccionado!.id}`)
+      fetch(`${API}/grupos/por-socio/${socioSeleccionado!.id}`)
         .then(res => res.json())
         .then(setGrupo);
-      fetch(`${API}/api/socios`)
+      fetch(`${API}/socios`)
         .then(res => res.json())
         .then(setSocios);
     } else {
@@ -143,7 +143,7 @@ export default function GestionarGrupoFamiliar() {
   const eliminarGrupo = async () => {
     if (!grupo) return;
     if (!window.confirm("¿Seguro que deseas eliminar el grupo completo? Se quitarán todos los integrantes.")) return;
-    const res = await fetch(`${API}/api/grupos/${grupo.grupo_id}/eliminar-grupo`, {
+    const res = await fetch(`${API}/grupos/${grupo.grupo_id}/eliminar-grupo`, {
       method: "POST"
     });
     const data = await res.json();

@@ -18,7 +18,7 @@ export default function CrearGrupoFamiliar() {
   const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    fetch(`${API}/api/socios`)
+    fetch(`${API}/socios`)
       .then((res) => res.json())
       .then(setSocios)
       .catch(() => setMensaje("Error al obtener socios."));
@@ -65,7 +65,7 @@ export default function CrearGrupoFamiliar() {
     }
     setMensaje(null);
     try {
-      const res = await fetch(`${API}/api/grupos/crear`, {
+      const res = await fetch(`${API}/grupos/crear`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
