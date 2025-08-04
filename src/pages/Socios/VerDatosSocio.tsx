@@ -100,7 +100,9 @@ export default function VerDatosSocio() {
       <h2 className="text-xl font-semibold mb-4 text-center">
         Mis datos personales
       </h2>
-
+    <h2 className="text-xl font-semibold mb-4 text-center">
+      Mis datos personales (⚠️ PRUEBA)
+    </h2>
       {mensaje && <p className="text-center text-sm mb-4">{mensaje}</p>}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[12px]">
