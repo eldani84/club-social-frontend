@@ -46,7 +46,7 @@ export default function InformeCuotasFiltros() {
 
   const obtenerFormasPago = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/informe-cuotas/formas-de-pago`);
+      const res = await fetch(`${API_URL}/informe-cuotas/formas-de-pago`);
       const data = await res.json();
       setFormasPago(data);
     } catch (error) {
@@ -62,7 +62,7 @@ export default function InformeCuotasFiltros() {
     if (filtroFechaPago) params.append("fecha_pago", filtroFechaPago);
     if (filtroFormaPago) params.append("forma_pago", filtroFormaPago);
 
-    const res = await fetch(`${API_URL}/api/informe-cuotas/buscar?${params.toString()}`);
+    const res = await fetch(`${API_URL}/informe-cuotas/buscar?${params.toString()}`);
     const data = await res.json();
     setCuotas(data);
   };
@@ -75,7 +75,7 @@ export default function InformeCuotasFiltros() {
     if (filtroFechaPago) params.append("fecha_pago", filtroFechaPago);
     if (filtroFormaPago) params.append("forma_pago", filtroFormaPago);
 
-    const url = `${API_URL}/api/informe-cuotas/exportar-excel?${params.toString()}`;
+    const url = `${API_URL}/informe-cuotas/exportar-excel?${params.toString()}`;
     window.open(url, "_blank");
   };
 

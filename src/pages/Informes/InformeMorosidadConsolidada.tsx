@@ -47,7 +47,7 @@ export default function InformeMorosidadConsolidada() {
         formaPagoId,
       });
 
-      const res = await fetch(`${API_URL}/api/informes/morosidad-consolidada?${params}`);
+      const res = await fetch(`${API_URL}/informes/morosidad-consolidada?${params}`);
       const data = await res.json();
 
       setResultados(data.socios || []);
@@ -75,7 +75,7 @@ export default function InformeMorosidadConsolidada() {
 
   const cargarFormasPago = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/formas-de-pago`);
+      const res = await fetch(`${API_URL}/formas-de-pago`);
       const data = await res.json();
       setFormasPago(data);
     } catch (err) {
