@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import "./PerfilSocioDashboard.css"; // Estilo app móvil
+import "./PerfilSocioDashboard.css";
 
 export default function PerfilSocioDashboard() {
   const [socio, setSocio] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const token = localStorage.getItem("socioToken");
-  if (!token) {
-    window.location.href = "/socio/login";
-  }
+    const token = localStorage.getItem("socioToken");
+    if (!token) {
+      window.location.href = "/socio/login";
+    }
   }, []);
 
   useEffect(() => {
@@ -40,14 +40,12 @@ export default function PerfilSocioDashboard() {
           </div>
 
           <div className="botonera-app">
-            <div className="botonera-app">
-              <Link to="/socio/perfil/datos" className="boton-app">📄 Ver Mis Datos</Link>
-              <Link to="/socio/perfil/cambiar-clave" className="boton-app">🔒 Cambiar Contraseña</Link>
-              <Link to="/socio/perfil/grupo" className="boton-app">👨‍👩‍👧‍👦 Grupo Familiar</Link>
-              <Link to="/socio/perfil/cuotas" className="boton-app">💰 Cuotas y Pagos</Link>
-              <Link to="/socio/perfil/link-pago" className="boton-app">💳 Generar Link de Pago</Link>
-              <Link to="/socio/perfil/saldos" className="boton-app">🧾 Saldos Extras</Link>
-            </div>
+            <Link to="/socio/perfil/datos" className="boton-app">📄 Ver Mis Datos</Link>
+            <Link to="/socio/perfil/cambiar-clave" className="boton-app">🔒 Cambiar Contraseña</Link>
+            <Link to="/socio/perfil/grupo" className="boton-app">👨‍👩‍👧‍👦 Grupo Familiar</Link>
+            <Link to="/socio/perfil/cuotas" className="boton-app">💰 Cuotas y Pagos</Link>
+            <Link to="/socio/perfil/link-pago" className="boton-app">💳 Generar Link de Pago</Link>
+            <Link to="/socio/perfil/saldos" className="boton-app">🧾 Saldos Extras</Link>
           </div>
         </>
       ) : (

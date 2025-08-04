@@ -26,6 +26,8 @@ interface Socio {
 export default function VerDatosSocio() {
   const { usuario } = useAuth();
   const [socio, setSocio] = useState<Socio | null>(null);
+  const [editando, setEditando] = useState(false);
+  const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
     if (usuario?.id) {
@@ -38,6 +40,30 @@ export default function VerDatosSocio() {
     }
   }, [usuario]);
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!socio) return;
+    const { name, value } = e.target;
+    setSocio({ ...socio, [name]: value });
+  };
+
+  const handleGuardar = async () => {
+    setMensaje("");
+    try {
+      const res = await fetch(`${API}/api/socios/${socio?.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(socio),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error al actualizar");
+
+      setMensaje("✅ Cambios guardados correctamente.");
+      setEditando(false);
+    } catch (err: any) {
+      setMensaje(`❌ ${err.message}`);
+    }
+  };
+
   if (!socio) return <p>Cargando datos del socio...</p>;
 
   return (
@@ -45,6 +71,8 @@ export default function VerDatosSocio() {
       <h2 className="text-xl font-semibold mb-4 text-center">
         Mis datos personales
       </h2>
+
+      {mensaje && <p className="text-center text-sm mb-4">{mensaje}</p>}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[12px]">
         <label>
@@ -58,20 +86,48 @@ export default function VerDatosSocio() {
           {new Date(socio.fecha_nacimiento).toLocaleDateString()}
         </label>
         <label>
-          <strong>Email:</strong> {socio.email}
+          <strong>Email:</strong><br />
+          {editando ? (
+            <input type="email" name="email" value={socio.email} onChange={handleChange} className="input" />
+          ) : (
+            socio.email
+          )}
         </label>
         <label>
-          <strong>Instagram:</strong> {socio.instagram}
+          <strong>Instagram:</strong><br />
+          {editando ? (
+            <input type="text" name="instagram" value={socio.instagram} onChange={handleChange} className="input" />
+          ) : (
+            socio.instagram
+          )}
         </label>
         <label>
-          <strong>Teléfono:</strong> {socio.telefono}
+          <strong>Teléfono:</strong><br />
+          {editando ? (
+            <input type="text" name="telefono" value={socio.telefono} onChange={handleChange} className="input" />
+          ) : (
+            socio.telefono
+          )}
         </label>
         <label className="sm:col-span-2">
-          <strong>Domicilio:</strong> {socio.direccion}, {socio.localidad},{" "}
-          {socio.provincia}
+          <strong>Domicilio:</strong><br />
+          {editando ? (
+            <>
+              <input type="text" name="direccion" value={socio.direccion} onChange={handleChange} placeholder="Dirección" className="input mb-1" />
+              <input type="text" name="localidad" value={socio.localidad} onChange={handleChange} placeholder="Localidad" className="input mb-1" />
+              <input type="text" name="provincia" value={socio.provincia} onChange={handleChange} placeholder="Provincia" className="input" />
+            </>
+          ) : (
+            `${socio.direccion}, ${socio.localidad}, ${socio.provincia}`
+          )}
         </label>
         <label>
-          <strong>Ocupación:</strong> {socio.ocupacion}
+          <strong>Ocupación:</strong><br />
+          {editando ? (
+            <input type="text" name="ocupacion" value={socio.ocupacion} onChange={handleChange} className="input" />
+          ) : (
+            socio.ocupacion
+          )}
         </label>
         <label>
           <strong>N° Carnet:</strong> {socio.nro_carnet}
@@ -89,6 +145,18 @@ export default function VerDatosSocio() {
         <label className="sm:col-span-2">
           <strong>Observaciones:</strong> {socio.observaciones || "-"}
         </label>
+      </div>
+
+      <div className="text-center mt-6">
+        {!editando ? (
+          <button onClick={() => setEditando(true)} className="bg-red-600 text-white py-2 px-4 rounded text-sm">
+            ✏️ Modificar datos
+          </button>
+        ) : (
+          <button onClick={handleGuardar} className="bg-green-600 text-white py-2 px-4 rounded text-sm">
+            💾 Guardar cambios
+          </button>
+        )}
       </div>
     </div>
   );
