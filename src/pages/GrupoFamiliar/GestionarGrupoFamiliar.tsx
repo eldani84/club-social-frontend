@@ -40,7 +40,8 @@ export default function GestionarGrupoFamiliar() {
   useEffect(() => {
     fetch(`${API}/socios`)
       .then(res => res.json())
-      .then(setSocios);
+      .then(setSocios)
+      .catch(() => setMensaje("Error al cargar la lista de socios."));
   }, []);
 
   useEffect(() => {
@@ -106,12 +107,7 @@ export default function GestionarGrupoFamiliar() {
     const data = await res.json();
     if (data.success) {
       setMensaje("Integrante eliminado con éxito.");
-      fetch(`${API}/grupos/por-socio/${socioSeleccionado!.id}`)
-        .then(res => res.json())
-        .then(setGrupo);
-      fetch(`${API}/api/socios`)
-        .then(res => res.json())
-        .then(setSocios);
+      actualizarGrupoYLista();
     } else {
       setMensaje(data.error || "Error eliminando integrante.");
     }
@@ -129,12 +125,7 @@ export default function GestionarGrupoFamiliar() {
       setMensaje("Integrante agregado con éxito.");
       setNuevoSocioBusqueda("");
       setResultadosAgregar([]);
-      fetch(`${API}/grupos/por-socio/${socioSeleccionado!.id}`)
-        .then(res => res.json())
-        .then(setGrupo);
-      fetch(`${API}/socios`)
-        .then(res => res.json())
-        .then(setSocios);
+      actualizarGrupoYLista();
     } else {
       setMensaje(data.error || "Error agregando integrante.");
     }
@@ -151,12 +142,22 @@ export default function GestionarGrupoFamiliar() {
       setMensaje("Grupo eliminado con éxito.");
       setGrupo(null);
       setSocioSeleccionado(null);
-      fetch(`${API}/api/socios`)
+      fetch(`${API}/socios`)
         .then(res => res.json())
         .then(setSocios);
     } else {
       setMensaje(data.error || "Error eliminando el grupo.");
     }
+  };
+
+  const actualizarGrupoYLista = () => {
+    if (!socioSeleccionado) return;
+    fetch(`${API}/grupos/por-socio/${socioSeleccionado.id}`)
+      .then(res => res.json())
+      .then(setGrupo);
+    fetch(`${API}/socios`)
+      .then(res => res.json())
+      .then(setSocios);
   };
 
   return (
