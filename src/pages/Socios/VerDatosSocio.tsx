@@ -52,8 +52,9 @@ export default function VerDatosSocio() {
         setSocio(socioConValores);
 
         const rutaFoto = socioConValores.foto_url?.startsWith("/uploads/")
-          ? `${API}${socioConValores.foto_url}`
-          : `${API}/uploads/${socioConValores.foto_url}`;
+          ? `https://club-social-backend.onrender.com${socioConValores.foto_url}`
+          : `https://club-social-backend.onrender.com/uploads/${socioConValores.foto_url}`;
+
         setFotoPreview(rutaFoto);
       })
       .catch((err) => {
