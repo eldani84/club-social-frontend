@@ -50,7 +50,11 @@ export default function VerDatosSocio() {
           foto_url: data.foto_url ?? ""
         };
         setSocio(socioConValores);
-        setFotoPreview(`${API}${socioConValores.foto_url}`);
+
+        const rutaFoto = socioConValores.foto_url?.startsWith("/uploads/")
+          ? `${API}${socioConValores.foto_url}`
+          : `${API}/uploads/${socioConValores.foto_url}`;
+        setFotoPreview(rutaFoto);
       })
       .catch((err) => {
         console.error("❌ Error al cargar socio:", err);
@@ -109,7 +113,11 @@ export default function VerDatosSocio() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al subir foto");
 
-      setFotoPreview(`${API}${data.foto_url}`);
+      const nuevaFoto = data.foto_url.startsWith("/uploads/")
+        ? `${API}${data.foto_url}`
+        : `${API}/uploads/${data.foto_url}`;
+
+      setFotoPreview(nuevaFoto);
       setSocio({ ...socio, foto_url: data.foto_url });
       setMensaje("✅ Foto actualizada correctamente.");
     } catch (err: any) {
