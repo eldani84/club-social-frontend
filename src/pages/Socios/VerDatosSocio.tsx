@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../context/auth";
 
 const API = import.meta.env.VITE_API_URL;
+const BACKEND_BASE = "https://club-social-backend.onrender.com";
 
 interface Socio {
   id: number;
@@ -52,8 +53,8 @@ export default function VerDatosSocio() {
         setSocio(socioConValores);
 
         const rutaFoto = socioConValores.foto_url?.startsWith("/uploads/")
-          ? `https://club-social-backend.onrender.com${socioConValores.foto_url}`
-          : `https://club-social-backend.onrender.com/uploads/${socioConValores.foto_url}`;
+          ? `${BACKEND_BASE}${socioConValores.foto_url}`
+          : `${BACKEND_BASE}/uploads/${socioConValores.foto_url}`;
 
         setFotoPreview(rutaFoto);
       })
@@ -114,9 +115,9 @@ export default function VerDatosSocio() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al subir foto");
 
-      const nuevaFoto = data.foto_url.startsWith("/uploads/")
-        ? `${API}${data.foto_url}`
-        : `${API}/uploads/${data.foto_url}`;
+      const nuevaFoto = data.foto_url?.startsWith("/uploads/")
+        ? `${BACKEND_BASE}${data.foto_url}`
+        : `${BACKEND_BASE}/uploads/${data.foto_url}`;
 
       setFotoPreview(nuevaFoto);
       setSocio({ ...socio, foto_url: data.foto_url });
