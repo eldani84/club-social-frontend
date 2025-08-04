@@ -35,6 +35,10 @@ export default function VerDatosSocio() {
       fetch(`${API}/api/socios/${usuario.id}`)
         .then((res) => res.json())
         .then((data) => {
+          if (!data || typeof data !== "object") {
+            console.error("Datos inválidos recibidos del backend:", data);
+            return;
+          }
           const socioConValores: Socio = {
             ...data,
             email: data.email ?? "",
@@ -186,3 +190,4 @@ export default function VerDatosSocio() {
     </div>
   );
 }
+
