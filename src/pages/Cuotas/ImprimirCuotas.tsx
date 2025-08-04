@@ -24,20 +24,22 @@ export default function ImprimirCuotas() {
   const [formaPago, setFormaPago] = useState("");
   const [formasPago, setFormasPago] = useState<FormaPago[]>([]);
 
+  const API = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     if (busqueda.length < 2) return;
-    fetch(`http://localhost:3000/api/socios/buscar?busqueda=${busqueda}`)
+    fetch(`${API}/socios/buscar?busqueda=${busqueda}`)
       .then((res) => res.json())
       .then((data) => setSocios(data))
       .catch(() => setSocios([]));
-  }, [busqueda]);
+  }, [busqueda, API]);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/formas_pago")
+    fetch(`${API}/formas_pago`)
       .then((res) => res.json())
       .then(setFormasPago)
       .catch(() => setFormasPago([]));
-  }, []);
+  }, [API]);
 
   const handleBuscarSocio = (socio: Socio) => {
     setSocioSeleccionado(socio);
@@ -47,7 +49,7 @@ export default function ImprimirCuotas() {
   };
 
   const handleImprimir = () => {
-    const backendBase = "http://localhost:3000";
+    const backendBase = API.replace("/api", "");
     const mesYYYYMM = `${anio}-${mes}`;
     if (mostrarTodos) {
       let url = `${backendBase}/api/imprimir/cupones?mes=${mesYYYYMM}`;

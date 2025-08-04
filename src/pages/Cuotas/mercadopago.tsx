@@ -7,6 +7,8 @@ export default function GenerarLinksMasivosMP() {
   const [loading, setLoading] = useState(false);
   const [links, setLinks] = useState<{ socio: string; url: string }[]>([]);
 
+  const API = import.meta.env.VITE_API_URL;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMensaje("");
@@ -15,7 +17,7 @@ export default function GenerarLinksMasivosMP() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3000/api/mercadopago/generar-links-masivos", {
+      const res = await fetch(`${API}/mercadopago/generar-links-masivos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mes }),

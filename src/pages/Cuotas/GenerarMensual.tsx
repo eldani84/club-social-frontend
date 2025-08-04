@@ -33,6 +33,8 @@ export default function GenerarMensual() {
   const [generando, setGenerando] = useState(false);
   const [resultadoFinal, setResultadoFinal] = useState<any>(null);
 
+  const API = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const beforeUnload = (e: BeforeUnloadEvent) => {
       if (generando) {
@@ -54,7 +56,7 @@ export default function GenerarMensual() {
     setConfirmar(false);
 
     try {
-      const res = await fetch("http://localhost:3000/api/cuotas/simular-generacion", {
+      const res = await fetch(`${API}/cuotas/simular-generacion`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mes, anio }),
@@ -75,7 +77,7 @@ export default function GenerarMensual() {
     setError(null);
     setResultadoFinal(null);
     try {
-      const res = await fetch("http://localhost:3000/api/cuotas/generar", {
+      const res = await fetch(`${API}/cuotas/generar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mes, anio }),

@@ -18,15 +18,16 @@ export default function GenerarCuotaIndividual() {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
 
+  const API = import.meta.env.VITE_API_URL;
+
   // Autocomplete de socio por similitud
   useEffect(() => {
     if (busqueda.length < 2) return;
-    fetch(`http://localhost:3000/api/socios/buscar?busqueda=${busqueda}`)
+    fetch(`${API}/socios/buscar?busqueda=${busqueda}`)
       .then((res) => res.json())
       .then((data) => setSocios(data))
       .catch(() => setSocios([]));
-  }, [busqueda]);
-
+  }, [busqueda, API]);
 
   const handleBuscarSocio = (socio: Socio) => {
     setSocioSeleccionado(socio);
@@ -43,15 +44,15 @@ export default function GenerarCuotaIndividual() {
     }
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/api/cuotas/individual", {
+      const res = await fetch(`${API}/cuotas/individual`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           socio_id: socioSeleccionado.id,
           mes,
-          anio
+          anio,
         }),
-    });
+      });
       const data = await res.json();
       if (res.ok) {
         setMsg("✅ Cuota generada correctamente.");
@@ -64,6 +65,7 @@ export default function GenerarCuotaIndividual() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="max-w-lg mx-auto p-6 bg-white shadow-xl rounded-2xl mt-8 border border-gray-100">

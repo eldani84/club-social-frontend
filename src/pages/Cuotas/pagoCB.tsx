@@ -9,7 +9,7 @@ type Cuota = {
   forma_pago_id: number;
   estado: string;
   codigo_barra: string;
-  monto_pago: number; // campo de la base
+  monto_pago: number;
 };
 
 type FormaPago = {
@@ -27,21 +27,21 @@ export default function PagoPorCB() {
   const [loading, setLoading] = useState(false);
   const inputCodigo = useRef<HTMLInputElement>(null);
 
-  // Formas de pago
+  const API = import.meta.env.VITE_API_URL;
+
   const [formasPago, setFormasPago] = useState<FormaPago[]>([]);
   useEffect(() => {
-    fetch("http://localhost:3000/api/formas_pago")
+    fetch(`${API}/formas_pago`)
       .then(res => res.json())
       .then(data => setFormasPago(data))
       .catch(() => setFormasPago([]));
-  }, []);
+  }, [API]);
 
   function nombreFormaPago(id: number): string {
     const fp = formasPago.find(f => f.id === id);
     return fp ? fp.forma_de_pago : id ? `ID:${id}` : "";
   }
 
-  // Buscar cuota por código de barra
   const buscarCuota = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -53,7 +53,7 @@ export default function PagoPorCB() {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/api/pagos_cb/buscar_codigo_barra?codigo_barra=${encodeURIComponent(
+        `${API}/pagos_cb/buscar_codigo_barra?codigo_barra=${encodeURIComponent(
           codigoBarra.trim()
         )}`
       );
@@ -66,7 +66,6 @@ export default function PagoPorCB() {
       const data = await res.json();
       setCuota(data);
 
-      // Monto pendiente: Importe - ya pagado
       const saldo = Math.max(0, Number(data.importe) - Number(data.monto_pago || 0));
       setMontoPago(saldo > 0 ? String(saldo) : "");
       setTimeout(() => {
@@ -79,17 +78,15 @@ export default function PagoPorCB() {
     setLoading(false);
   };
 
-  // Registrar pago
   const registrarPago = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setMensaje("");
     if (!cuota) return;
 
-    // Saldo restante
     const saldo = Math.max(0, Number(cuota.importe) - Number(cuota.monto_pago || 0));
-
     const monto = parseFloat(montoPago);
+
     if (isNaN(monto) || monto <= 0) {
       setError("El monto de pago debe ser mayor a cero.");
       return;
@@ -103,7 +100,7 @@ export default function PagoPorCB() {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/api/pagos_cb/${cuota.id}/pagar`,
+        `${API}/pagos_cb/${cuota.id}/pagar`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -132,7 +129,6 @@ export default function PagoPorCB() {
     }
   };
 
-  // Si hay cuota, calculo los valores para mostrar
   const importe = cuota ? Number(cuota.importe) : 0;
   const pagado = cuota ? Number(cuota.monto_pago || 0) : 0;
   const saldo = cuota ? Math.max(0, importe - pagado) : 0;

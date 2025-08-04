@@ -41,6 +41,8 @@ export default function ControlCuotas() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [loading, setLoading] = useState(false);
 
+  const API = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     buscarCuotas();
     obtenerFormasPago();
@@ -49,7 +51,7 @@ export default function ControlCuotas() {
 
   const obtenerFormasPago = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/formas-de-pago");
+      const res = await fetch(`${API}/formas-de-pago`);
       const data = await res.json();
       setFormasPago(data);
     } catch (error) {
@@ -66,9 +68,7 @@ export default function ControlCuotas() {
     if (filtroFechaPago) params.append("fecha_pago", filtroFechaPago);
     if (filtroFormaPago) params.append("forma_pago", filtroFormaPago);
 
-    const res = await fetch(
-      `http://localhost:3000/api/cuotas/buscar?${params.toString()}`
-    );
+    const res = await fetch(`${API}/cuotas/buscar?${params.toString()}`);
     const data = await res.json();
     setCuotas(data);
     setLoading(false);
@@ -115,7 +115,7 @@ export default function ControlCuotas() {
     if (filtroFechaPago) params.append("fecha_pago", filtroFechaPago);
     if (filtroFormaPago) params.append("forma_pago", filtroFormaPago);
 
-    const url = `http://localhost:3000/api/cuotas/exportar-excel?${params.toString()}`;
+    const url = `${API}/cuotas/exportar-excel?${params.toString()}`;
     window.open(url, "_blank");
   };
 
@@ -125,6 +125,7 @@ export default function ControlCuotas() {
         <h2 className="text-xl md:text-2xl font-extrabold text-red-700 mb-2 tracking-tight">
           Control de Cuotas
         </h2>
+
         {/* Filtros */}
         <form
           onSubmit={e => {
@@ -207,23 +208,11 @@ export default function ControlCuotas() {
           <table className="modern-table w-full min-w-[820px]">
             <thead className="bg-red-100 sticky top-0 z-10">
               <tr>
-                <th className="px-3 py-2 font-semibold text-left text-red-700 cursor-pointer select-none"
-                    onClick={() => handleSort("apellido")}>
-                  Apellido{sortField === "apellido" ? (sortOrder === "asc" ? " 🔼" : " 🔽") : ""}
-                </th>
-                <th className="px-3 py-2 font-semibold text-left text-red-700 cursor-pointer select-none"
-                    onClick={() => handleSort("nombre")}>
-                  Nombre{sortField === "nombre" ? (sortOrder === "asc" ? " 🔼" : " 🔽") : ""}
-                </th>
-                <th className="px-3 py-2 font-semibold text-left text-red-700 cursor-pointer select-none"
-                    onClick={() => handleSort("mes")}>
-                  Mes{sortField === "mes" ? (sortOrder === "asc" ? " 🔼" : " 🔽") : ""}
-                </th>
+                <th onClick={() => handleSort("apellido")} className="px-3 py-2 font-semibold text-left text-red-700 cursor-pointer">Apellido{sortField === "apellido" ? (sortOrder === "asc" ? " 🔼" : " 🔽") : ""}</th>
+                <th onClick={() => handleSort("nombre")} className="px-3 py-2 font-semibold text-left text-red-700 cursor-pointer">Nombre{sortField === "nombre" ? (sortOrder === "asc" ? " 🔼" : " 🔽") : ""}</th>
+                <th onClick={() => handleSort("mes")} className="px-3 py-2 font-semibold text-left text-red-700 cursor-pointer">Mes{sortField === "mes" ? (sortOrder === "asc" ? " 🔼" : " 🔽") : ""}</th>
                 <th className="px-3 py-2 font-semibold text-left text-red-700">Importe</th>
-                <th className="px-3 py-2 font-semibold text-left text-red-700 cursor-pointer select-none"
-                    onClick={() => handleSort("estado")}>
-                  Estado{sortField === "estado" ? (sortOrder === "asc" ? " 🔼" : " 🔽") : ""}
-                </th>
+                <th onClick={() => handleSort("estado")} className="px-3 py-2 font-semibold text-left text-red-700 cursor-pointer">Estado{sortField === "estado" ? (sortOrder === "asc" ? " 🔼" : " 🔽") : ""}</th>
                 <th className="px-3 py-2 font-semibold text-left text-red-700">Fecha Pago</th>
                 <th className="px-3 py-2 font-semibold text-left text-red-700">Monto Pago</th>
                 <th className="px-3 py-2 font-semibold text-left text-red-700">Código de Barra</th>
@@ -236,10 +225,8 @@ export default function ControlCuotas() {
                   <td className="px-3 py-2">{c.nombre}</td>
                   <td className="px-3 py-2">{c.mes}</td>
                   <td className="px-3 py-2">${c.importe}</td>
-                  <td className="px-3 py-2">
-                    {estados.find(e => e.value === c.estado)?.label || c.estado}
-                  </td>
-                  <td className="px-3 py-2">{c.fecha_pago ? c.fecha_pago.slice(0, 10) : ""}</td>
+                  <td className="px-3 py-2">{estados.find(e => e.value === c.estado)?.label || c.estado}</td>
+                  <td className="px-3 py-2">{c.fecha_pago?.slice(0, 10)}</td>
                   <td className="px-3 py-2">{c.monto_pago ? `$${c.monto_pago}` : ""}</td>
                   <td className="px-3 py-2 font-mono">{c.codigo_barra}</td>
                 </tr>
