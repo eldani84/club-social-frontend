@@ -97,7 +97,11 @@ export default function VerDatosSocio() {
   const handleFotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !socio) return;
 
+
     const formData = new FormData();
+        console.log("📸 Subiendo foto para DNI:", socio.dni);
+        formData.append("dni", socio.dni);
+
     formData.append("foto", e.target.files[0]);
     formData.append("dni", socio.dni);
 
