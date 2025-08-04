@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../../context/auth";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -20,39 +21,39 @@ interface Socio {
   forma_de_pago: string;
   fecha_alta: string;
   observaciones: string;
-  foto_url?: string;
+  foto_url: string;
 }
 
 export default function VerDatosSocio() {
+  const { usuario } = useAuth();
   const [socio, setSocio] = useState<Socio | null>(null);
   const [editando, setEditando] = useState(false);
   const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
-    const socioData = localStorage.getItem("socioData");
-    if (socioData) {
-      try {
-        const socioParsed = JSON.parse(socioData);
-        // Convertir nulls a cadenas vacías
-        const socioConValores: Socio = {
-          ...socioParsed,
-          email: socioParsed.email ?? "",
-          instagram: socioParsed.instagram ?? "",
-          telefono: socioParsed.telefono ?? "",
-          direccion: socioParsed.direccion ?? "",
-          localidad: socioParsed.localidad ?? "",
-          provincia: socioParsed.provincia ?? "",
-          ocupacion: socioParsed.ocupacion ?? "",
-          observaciones: socioParsed.observaciones ?? "",
-          foto_url: socioParsed.foto_url ?? ""
-        };
-
-        setSocio(socioConValores);
-      } catch (error) {
-        console.error("Error al parsear socioData desde localStorage:", error);
-      }
+    if (usuario?.id) {
+      fetch(`${API}/api/socios/${usuario.id}`)
+        .then((res) => res.json())
+        .then((data) => {
+          const socioConValores: Socio = {
+            ...data,
+            email: data.email ?? "",
+            instagram: data.instagram ?? "",
+            telefono: data.telefono ?? "",
+            direccion: data.direccion ?? "",
+            localidad: data.localidad ?? "",
+            provincia: data.provincia ?? "",
+            ocupacion: data.ocupacion ?? "",
+            observaciones: data.observaciones ?? "",
+            foto_url: data.foto_url ?? ""
+          };
+          setSocio(socioConValores);
+        })
+        .catch((err) =>
+          console.error("Error al obtener datos del socio:", err)
+        );
     }
-  }, []);
+  }, [usuario]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!socio) return;
@@ -63,15 +64,24 @@ export default function VerDatosSocio() {
   const handleGuardar = async () => {
     setMensaje("");
     try {
+      const socioEditable = {
+        email: socio?.email,
+        instagram: socio?.instagram,
+        telefono: socio?.telefono,
+        direccion: socio?.direccion,
+        localidad: socio?.localidad,
+        provincia: socio?.provincia,
+        ocupacion: socio?.ocupacion
+      };
+
       const res = await fetch(`${API}/api/socios/${socio?.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(socio),
+        body: JSON.stringify(socioEditable),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al actualizar");
 
-      localStorage.setItem("socioData", JSON.stringify(socio));
       setMensaje("✅ Cambios guardados correctamente.");
       setEditando(false);
     } catch (err: any) {
