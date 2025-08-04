@@ -32,7 +32,7 @@ export default function VerDatosSocio() {
 
   useEffect(() => {
     if (usuario?.id) {
-      fetch(`${API}/api/socios/${usuario.id}`)
+      fetch(`${API}/autogestion/socios/${usuario.id}`)
         .then((res) => res.json())
         .then((data) => {
           if (!data || typeof data !== "object") {
@@ -78,7 +78,7 @@ export default function VerDatosSocio() {
         ocupacion: socio?.ocupacion
       };
 
-      const res = await fetch(`${API}/api/socios/${socio?.id}`, {
+      const res = await fetch(`${API}/autogestion/socios/${socio?.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(socioEditable),
@@ -98,11 +98,9 @@ export default function VerDatosSocio() {
   return (
     <div className="p-4 max-w-3xl mx-auto bg-white rounded shadow text-sm">
       <h2 className="text-xl font-semibold mb-4 text-center">
-        Mis datos personales
+        Mis datos personales (⚠️ PRUEBA)
       </h2>
-    <h2 className="text-xl font-semibold mb-4 text-center">
-      Mis datos personales (⚠️ PRUEBA)
-    </h2>
+
       {mensaje && <p className="text-center text-sm mb-4">{mensaje}</p>}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[12px]">
@@ -192,4 +190,3 @@ export default function VerDatosSocio() {
     </div>
   );
 }
-
