@@ -48,23 +48,22 @@ export default function IngresarSocio() {
     nro_carnet: "",
   });
 
-const API = import.meta.env.VITE_API_URL;
+  const API = import.meta.env.VITE_API_URL;
 
-useEffect(() => {
-  fetch(`${API}/categorias`)
-    .then((res) => res.json())
-    .then((data) => setCategorias(data))
-    .catch((err) => console.error("Error al cargar categorías", err));
+  useEffect(() => {
+    fetch(`${API}/categorias`)
+      .then((res) => res.json())
+      .then((data) => setCategorias(data))
+      .catch((err) => console.error("Error al cargar categorías", err));
 
-  fetch(`${API}/formas_pago`)
-    .then((res) => res.json())
-    .then((data) => setFormasPago(data))
-    .catch((err) => {
-      console.error("Error al cargar formas de pago", err);
-      setFormasPago([]);
-    });
-}, []);
-
+    fetch(`${API}/formas_pago`)
+      .then((res) => res.json())
+      .then((data) => setFormasPago(data))
+      .catch((err) => {
+        console.error("Error al cargar formas de pago", err);
+        setFormasPago([]);
+      });
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -104,7 +103,7 @@ useEffect(() => {
     return true;
   };
 
-    const activarCamara = async () => {
+  const activarCamara = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       if (videoRef.current) {
@@ -138,11 +137,11 @@ useEffect(() => {
     const blob = await (await fetch(dataUrl)).blob();
 
     const formData = new FormData();
-    formData.append("foto", blob, "foto.jpg");
+    formData.append("foto", blob, `${form.dni}.jpg`);
     formData.append("dni", form.dni);
 
     try {
-      const res = await fetch("http://localhost:3000/api/fotos/subir-foto", {
+      const res = await fetch(`${API}/fotos/subir-foto`, {
         method: "POST",
         body: formData,
       });
@@ -163,66 +162,62 @@ useEffect(() => {
     }
   };
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!validarFormulario()) return;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validarFormulario()) return;
 
-  try {
-    const res = await fetch("http://localhost:3000/api/socios", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        categoria_id: parseInt(form.categoria_id),
-        forma_pago_id: parseInt(form.forma_pago_id),
-      }),
-    });
+    try {
+      const res = await fetch(`${API}/socios`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          categoria_id: parseInt(form.categoria_id),
+          forma_pago_id: parseInt(form.forma_pago_id),
+        }),
+      });
 
-    if (!res.ok) {
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data?.error || "Error al registrar socio");
+        return;
+      }
+
       const data = await res.json();
-      alert(data?.error || "Error al registrar socio");
-      return;
+      const nuevoSocioId = data.id;
+
+      if (confirm("¿Desea imprimir la solicitud del socio?")) {
+        window.open(`${API}/ficha-socio/${nuevoSocioId}`, "_blank");
+      }
+
+      alert("Socio registrado correctamente");
+
+      setForm({
+        nombre: "",
+        apellido: "",
+        dni: "",
+        email: "",
+        instagram: "",
+        telefono: "",
+        fecha_nacimiento: "",
+        estado: "activo",
+        categoria_id: "",
+        forma_pago_id: "",
+        localidad: "",
+        provincia: "",
+        direccion: "",
+        ocupacion: "",
+        observaciones: "",
+        foto_url: "",
+        nro_carnet: "",
+      });
+
+      detenerCamara();
+    } catch (err) {
+      console.error("Error al registrar socio:", err);
+      alert("Ocurrió un error inesperado.");
     }
-
-    // ✅ Obtener ID del socio creado
-    const data = await res.json();
-    const nuevoSocioId = data.id;
-
-    // ✅ Preguntar si desea imprimir
-    if (confirm("¿Desea imprimir la solicitud del socio?")) {
-      window.open(`http://localhost:3000/api/ficha-socio/${nuevoSocioId}`, "_blank");
-    }
-
-    alert("Socio registrado correctamente");
-
-    // Reset del formulario
-    setForm({
-      nombre: "",
-      apellido: "",
-      dni: "",
-      email: "",
-      instagram: "",
-      telefono: "",
-      fecha_nacimiento: "",
-      estado: "activo",
-      categoria_id: "",
-      forma_pago_id: "",
-      localidad: "",
-      provincia: "",
-      direccion: "",
-      ocupacion: "",
-      observaciones: "",
-      foto_url: "",
-      nro_carnet: "",
-    });
-
-    detenerCamara();
-
-  } catch (err) {
-    console.error("Error al registrar socio:", err);
-    alert("Ocurrió un error inesperado.");
-  }
-};
+  };
 
   return (
     <div className="main-content">
@@ -264,31 +259,28 @@ useEffect(() => {
           <label>Ocupación<input name="ocupacion" value={form.ocupacion} onChange={handleChange} /></label>
           <label>N° Carnet<input name="nro_carnet" value={form.nro_carnet} onChange={handleChange} /></label>
 
-          {/* FOTO */}
           <div className="md:col-span-2">
-  <label>Capturar Foto</label>
-  <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-    <video ref={videoRef} width="320" height="240" style={{ borderRadius: 8, border: "1px solid #ccc" }} />
-    <canvas ref={canvasRef} width="320" height="240" style={{ display: "none" }} />
-    
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-      <button type="button" className="modern-btn" onClick={activarCamara}>
-        🎥 Activar Cámara
-      </button>
-      <button type="button" className="modern-btn" onClick={capturarFoto}>
-        📸 Tomar Foto
-      </button>
-    </div>
-  </div>
+            <label>Capturar Foto</label>
+            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+              <video ref={videoRef} width="320" height="240" style={{ borderRadius: 8, border: "1px solid #ccc" }} />
+              <canvas ref={canvasRef} width="320" height="240" style={{ display: "none" }} />
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                <button type="button" className="modern-btn" onClick={activarCamara}>
+                  🎥 Activar Cámara
+                </button>
+                <button type="button" className="modern-btn" onClick={capturarFoto}>
+                  📸 Tomar Foto
+                </button>
+              </div>
+            </div>
 
-  {form.foto_url && (
-    <div style={{ marginTop: "10px" }}>
-      <strong>Foto guardada:</strong><br />
-      <img src={form.foto_url} alt="Foto del socio" width="160" style={{ borderRadius: 6, border: "1px solid #ccc" }} />
-    </div>
-  )}
-</div>
-
+            {form.foto_url && (
+              <div style={{ marginTop: "10px" }}>
+                <strong>Foto guardada:</strong><br />
+                <img src={form.foto_url} alt="Foto del socio" width="160" style={{ borderRadius: 6, border: "1px solid #ccc" }} />
+              </div>
+            )}
+          </div>
 
           <label className="md:col-span-2">Observaciones
             <textarea name="observaciones" value={form.observaciones} onChange={handleChange} rows={3} />
