@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/auth";
+import { FaCamera } from "react-icons/fa"; // Asegurate de tener instalado react-icons
 
 const API = import.meta.env.VITE_API_URL;
-const BACKEND_BASE = "https://club-social-backend.onrender.com";
 
 interface Socio {
   id: number;
@@ -51,12 +51,7 @@ export default function VerDatosSocio() {
           foto_url: data.foto_url ?? ""
         };
         setSocio(socioConValores);
-
-        const rutaFoto = socioConValores.foto_url?.startsWith("/uploads/")
-          ? `${BACKEND_BASE}${socioConValores.foto_url}`
-          : `${BACKEND_BASE}/uploads/${socioConValores.foto_url}`;
-
-        setFotoPreview(rutaFoto);
+        setFotoPreview(`${API}${socioConValores.foto_url}`);
       })
       .catch((err) => {
         console.error("❌ Error al cargar socio:", err);
@@ -115,11 +110,7 @@ export default function VerDatosSocio() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al subir foto");
 
-      const nuevaFoto = data.foto_url?.startsWith("/uploads/")
-        ? `${BACKEND_BASE}${data.foto_url}`
-        : `${BACKEND_BASE}/uploads/${data.foto_url}`;
-
-      setFotoPreview(nuevaFoto);
+      setFotoPreview(`${API}${data.foto_url}`);
       setSocio({ ...socio, foto_url: data.foto_url });
       setMensaje("✅ Foto actualizada correctamente.");
     } catch (err: any) {
@@ -140,15 +131,25 @@ export default function VerDatosSocio() {
 
       <div className="flex items-center gap-4 mb-4">
         {fotoPreview ? (
-          <img src={fotoPreview} alt="Foto del socio" className="w-24 h-24 object-cover rounded-full border" />
+          <img
+            src={fotoPreview}
+            alt="Foto del socio"
+            className="w-[200px] h-[250px] object-cover border rounded"
+          />
         ) : (
-          <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-sm border">
+          <div className="w-[200px] h-[250px] bg-gray-200 border flex items-center justify-center text-gray-500 rounded text-sm">
             Sin foto
           </div>
         )}
         <div>
           <p className="text-base font-semibold">{socio.apellido} {socio.nombre}</p>
-          <input type="file" accept="image/*" onChange={handleFotoChange} className="text-xs mt-1" />
+          {editando && (
+            <label className="inline-flex items-center gap-2 text-sm text-blue-600 cursor-pointer mt-2">
+              <FaCamera />
+              <span>Subir nueva foto</span>
+              <input type="file" accept="image/*" onChange={handleFotoChange} className="hidden" />
+            </label>
+          )}
         </div>
       </div>
 
