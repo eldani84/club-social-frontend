@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../../context/auth";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -24,21 +23,21 @@ interface Socio {
 }
 
 export default function VerDatosSocio() {
-  const { usuario } = useAuth();
   const [socio, setSocio] = useState<Socio | null>(null);
   const [editando, setEditando] = useState(false);
   const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
-    if (usuario?.id) {
-      fetch(`${API}/api/socios/${usuario.id}`)
-        .then((res) => res.json())
-        .then((data) => setSocio(data))
-        .catch((err) =>
-          console.error("Error al obtener datos del socio:", err)
-        );
+    const socioData = localStorage.getItem("socioData");
+    if (socioData) {
+      try {
+        const socioParsed = JSON.parse(socioData);
+        setSocio(socioParsed);
+      } catch (error) {
+        console.error("Error al parsear socioData desde localStorage:", error);
+      }
     }
-  }, [usuario]);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!socio) return;
@@ -57,6 +56,7 @@ export default function VerDatosSocio() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al actualizar");
 
+      localStorage.setItem("socioData", JSON.stringify(socio));
       setMensaje("✅ Cambios guardados correctamente.");
       setEditando(false);
     } catch (err: any) {
