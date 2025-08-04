@@ -31,32 +31,45 @@ export default function VerDatosSocio() {
   const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
-    if (usuario?.id) {
-      fetch(`${API}/autogestion/socios/${usuario.id}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (!data || typeof data !== "object") {
-            console.error("Datos inválidos recibidos del backend:", data);
-            return;
-          }
-          const socioConValores: Socio = {
-            ...data,
-            email: data.email ?? "",
-            instagram: data.instagram ?? "",
-            telefono: data.telefono ?? "",
-            direccion: data.direccion ?? "",
-            localidad: data.localidad ?? "",
-            provincia: data.provincia ?? "",
-            ocupacion: data.ocupacion ?? "",
-            observaciones: data.observaciones ?? "",
-            foto_url: data.foto_url ?? ""
-          };
-          setSocio(socioConValores);
-        })
-        .catch((err) =>
-          console.error("Error al obtener datos del socio:", err)
-        );
+    if (!usuario?.id) {
+      console.warn("⚠️ No hay ID de usuario disponible");
+      return;
     }
+
+    const url = `${API}/autogestion/socios/${usuario.id}`;
+    console.log("🔍 Cargando datos desde:", url);
+
+    fetch(url)
+      .then(async (res) => {
+        if (!res.ok) {
+          const texto = await res.text();
+          throw new Error(`Error HTTP ${res.status}: ${texto}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (!data || typeof data !== "object") {
+          throw new Error("Respuesta inválida del servidor");
+        }
+
+        const socioConValores: Socio = {
+          ...data,
+          email: data.email ?? "",
+          instagram: data.instagram ?? "",
+          telefono: data.telefono ?? "",
+          direccion: data.direccion ?? "",
+          localidad: data.localidad ?? "",
+          provincia: data.provincia ?? "",
+          ocupacion: data.ocupacion ?? "",
+          observaciones: data.observaciones ?? "",
+          foto_url: data.foto_url ?? ""
+        };
+        setSocio(socioConValores);
+      })
+      .catch((err) => {
+        console.error("❌ Error al obtener datos del socio:", err.message);
+        setMensaje("❌ Error al cargar los datos. Intente nuevamente.");
+      });
   }, [usuario]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,6 +96,7 @@ export default function VerDatosSocio() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(socioEditable),
       });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error al actualizar");
 
