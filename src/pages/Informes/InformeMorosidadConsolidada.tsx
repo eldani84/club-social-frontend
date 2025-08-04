@@ -28,6 +28,8 @@ interface FormaDePago {
 }
 
 export default function InformeMorosidadConsolidada() {
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [minCuotas, setMinCuotas] = useState(3);
   const [desdeMes, setDesdeMes] = useState("2024-01");
   const [formaPagoId, setFormaPagoId] = useState("todos");
@@ -45,7 +47,7 @@ export default function InformeMorosidadConsolidada() {
         formaPagoId,
       });
 
-      const res = await fetch(`http://localhost:3000/api/informes/morosidad-consolidada?${params}`);
+      const res = await fetch(`${API_URL}/api/informes/morosidad-consolidada?${params}`);
       const data = await res.json();
 
       setResultados(data.socios || []);
@@ -65,15 +67,15 @@ export default function InformeMorosidadConsolidada() {
 
     const endpoint =
       formato === "excel"
-        ? "http://localhost:3000/api/informes/exportar-excel"
-        : "http://localhost:3000/api/informes/exportar-pdf";
+        ? `${API_URL}/api/informes/exportar-excel`
+        : `${API_URL}/api/informes/exportar-pdf`;
 
     window.open(`${endpoint}?${params}`, "_blank");
   };
 
   const cargarFormasPago = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/formas-de-pago");
+      const res = await fetch(`${API_URL}/api/formas-de-pago`);
       const data = await res.json();
       setFormasPago(data);
     } catch (err) {

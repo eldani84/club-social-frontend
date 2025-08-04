@@ -31,15 +31,14 @@ export default function GestionarGrupoFamiliar() {
   const [grupo, setGrupo] = useState<Grupo | null>(null);
   const [mensaje, setMensaje] = useState<string | null>(null);
 
-  // Para buscar socio a agregar
   const [nuevoSocioBusqueda, setNuevoSocioBusqueda] = useState("");
   const [resultadosAgregar, setResultadosAgregar] = useState<Socio[]>([]);
-
-  // Para buscar socio principal
   const [resultados, setResultados] = useState<Socio[]>([]);
 
+  const API = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
-    fetch("http://localhost:3000/api/socios")
+    fetch(`${API}/api/socios`)
       .then(res => res.json())
       .then(setSocios);
   }, []);
@@ -49,13 +48,12 @@ export default function GestionarGrupoFamiliar() {
       setGrupo(null);
       return;
     }
-    fetch(`http://localhost:3000/api/grupos/por-socio/${socioSeleccionado.id}`)
+    fetch(`${API}/api/grupos/por-socio/${socioSeleccionado.id}`)
       .then(res => res.json())
       .then(setGrupo)
       .catch(() => setMensaje("Error al cargar el grupo familiar."));
   }, [socioSeleccionado]);
 
-  // Coincidencia parcial en cada cambio de búsqueda principal
   useEffect(() => {
     const valor = busqueda.trim().toLowerCase();
     if (valor.length < 2) {
@@ -72,7 +70,6 @@ export default function GestionarGrupoFamiliar() {
     );
   }, [busqueda, socios]);
 
-  // Coincidencia parcial para agregar integrante
   useEffect(() => {
     const valor = nuevoSocioBusqueda.trim().toLowerCase();
     if (!grupo || valor.length < 2) {
@@ -91,7 +88,6 @@ export default function GestionarGrupoFamiliar() {
     );
   }, [nuevoSocioBusqueda, socios, grupo]);
 
-  // Cuando elegís uno de la lista principal, lo setea como seleccionado
   const handleElegirSocio = (socio: Socio) => {
     setSocioSeleccionado(socio);
     setBusqueda("");
@@ -102,7 +98,7 @@ export default function GestionarGrupoFamiliar() {
   const eliminarIntegrante = async (id_socio: number) => {
     if (!grupo) return;
     if (!window.confirm("¿Seguro que deseas quitar este integrante del grupo?")) return;
-    const res = await fetch(`http://localhost:3000/api/grupos/${grupo.grupo_id}/eliminar-integrante`, {
+    const res = await fetch(`${API}/api/grupos/${grupo.grupo_id}/eliminar-integrante`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id_socio })
@@ -110,10 +106,10 @@ export default function GestionarGrupoFamiliar() {
     const data = await res.json();
     if (data.success) {
       setMensaje("Integrante eliminado con éxito.");
-      fetch(`http://localhost:3000/api/grupos/por-socio/${socioSeleccionado!.id}`)
+      fetch(`${API}/api/grupos/por-socio/${socioSeleccionado!.id}`)
         .then(res => res.json())
         .then(setGrupo);
-      fetch("http://localhost:3000/api/socios")
+      fetch(`${API}/api/socios`)
         .then(res => res.json())
         .then(setSocios);
     } else {
@@ -121,10 +117,9 @@ export default function GestionarGrupoFamiliar() {
     }
   };
 
-  // 🔥 AGREGAR INTEGRANTE DESDE BUSCADOR
   const agregarIntegrante = async (socioAgregar: Socio) => {
     if (!grupo) return;
-    const res = await fetch(`http://localhost:3000/api/grupos/${grupo.grupo_id}/agregar-integrante`, {
+    const res = await fetch(`${API}/api/grupos/${grupo.grupo_id}/agregar-integrante`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id_socio: socioAgregar.id })
@@ -134,10 +129,10 @@ export default function GestionarGrupoFamiliar() {
       setMensaje("Integrante agregado con éxito.");
       setNuevoSocioBusqueda("");
       setResultadosAgregar([]);
-      fetch(`http://localhost:3000/api/grupos/por-socio/${socioSeleccionado!.id}`)
+      fetch(`${API}/api/grupos/por-socio/${socioSeleccionado!.id}`)
         .then(res => res.json())
         .then(setGrupo);
-      fetch("http://localhost:3000/api/socios")
+      fetch(`${API}/api/socios`)
         .then(res => res.json())
         .then(setSocios);
     } else {
@@ -148,7 +143,7 @@ export default function GestionarGrupoFamiliar() {
   const eliminarGrupo = async () => {
     if (!grupo) return;
     if (!window.confirm("¿Seguro que deseas eliminar el grupo completo? Se quitarán todos los integrantes.")) return;
-    const res = await fetch(`http://localhost:3000/api/grupos/${grupo.grupo_id}/eliminar-grupo`, {
+    const res = await fetch(`${API}/api/grupos/${grupo.grupo_id}/eliminar-grupo`, {
       method: "POST"
     });
     const data = await res.json();
@@ -156,7 +151,7 @@ export default function GestionarGrupoFamiliar() {
       setMensaje("Grupo eliminado con éxito.");
       setGrupo(null);
       setSocioSeleccionado(null);
-      fetch("http://localhost:3000/api/socios")
+      fetch(`${API}/api/socios`)
         .then(res => res.json())
         .then(setSocios);
     } else {
@@ -284,7 +279,7 @@ export default function GestionarGrupoFamiliar() {
               ))}
             </tbody>
           </table>
-          {/* --- Nueva sección de agregar integrante con buscador parcial --- */}
+
           <div style={{ marginTop: 18, position: "relative" }}>
             <label>
               Agregar integrante:

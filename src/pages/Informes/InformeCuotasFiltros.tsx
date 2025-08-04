@@ -30,6 +30,7 @@ const estados = [
 ];
 
 export default function InformeCuotasFiltros() {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [cuotas, setCuotas] = useState<Cuota[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [filtroMes, setFiltroMes] = useState("");
@@ -45,7 +46,7 @@ export default function InformeCuotasFiltros() {
 
   const obtenerFormasPago = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/informe-cuotas/formas-de-pago");
+      const res = await fetch(`${API_URL}/api/informe-cuotas/formas-de-pago`);
       const data = await res.json();
       setFormasPago(data);
     } catch (error) {
@@ -61,9 +62,7 @@ export default function InformeCuotasFiltros() {
     if (filtroFechaPago) params.append("fecha_pago", filtroFechaPago);
     if (filtroFormaPago) params.append("forma_pago", filtroFormaPago);
 
-    const res = await fetch(
-      `http://localhost:3000/api/informe-cuotas/buscar?${params.toString()}`
-    );
+    const res = await fetch(`${API_URL}/api/informe-cuotas/buscar?${params.toString()}`);
     const data = await res.json();
     setCuotas(data);
   };
@@ -76,7 +75,7 @@ export default function InformeCuotasFiltros() {
     if (filtroFechaPago) params.append("fecha_pago", filtroFechaPago);
     if (filtroFormaPago) params.append("forma_pago", filtroFormaPago);
 
-    const url = `http://localhost:3000/api/informe-cuotas/exportar-excel?${params.toString()}`;
+    const url = `${API_URL}/api/informe-cuotas/exportar-excel?${params.toString()}`;
     window.open(url, "_blank");
   };
 
@@ -89,117 +88,101 @@ export default function InformeCuotasFiltros() {
   const totalFaltaCobro = totalImporte - totalMontoPagado;
 
   return (
-<div className="max-w-[100vw] mx-auto p-2 md:p-6">
-  <div className="bg-white border border-gray-300 rounded-lg p-4 mb-6 shadow-sm">
+    <div className="max-w-[100vw] mx-auto p-2 md:p-6">
+      <div className="bg-white border border-gray-300 rounded-lg p-4 mb-6 shadow-sm">
+        <div className="flex flex-col md:flex-row md:justify-between gap-4">
 
-    {/* Contenedor horizontal: filtros + totales */}
-    <div className="flex flex-col md:flex-row md:justify-between gap-4">
+          <div className="flex flex-col gap-2 text-[0.75rem] md:w-2/3">
+            <div className="flex flex-wrap gap-4">
+              <label className="flex flex-col text-xs">
+                Apellido Nombre:
+                <input
+                  type="text"
+                  value={busqueda}
+                  placeholder="Buscar"
+                  onChange={(e) => setBusqueda(e.target.value)}
+                  className="border px-2 py-0 text-xs"
+                />
+              </label>
+            </div>
 
-      {/* Bloque de filtros (izquierda) */}
-      <div className="flex flex-col gap-2 text-[0.75rem] md:w-2/3">
+            <div className="flex flex-wrap gap-4">
+              <label className="flex flex-col text-xs">
+                Mes:
+                <input
+                  type="month"
+                  value={filtroMes}
+                  onChange={(e) => setFiltroMes(e.target.value)}
+                  className="border px-2 py-0 text-xs"
+                />
+              </label>
 
-        {/* Fila 1 */}
-        <div className="flex flex-wrap gap-4">
-          <label className="flex flex-col text-xs">
-            Apellido Nombre:
-            <input
-              id="busqueda"
-              type="text"
-              value={busqueda}
-              placeholder="Buscar"
-              onChange={(e) => setBusqueda(e.target.value)}
-              className="border px-2 py-0 text-xs"
-            />
-          </label>
+              <label className="flex flex-col text-xs">
+                Estado:
+                <select
+                  value={filtroEstado}
+                  onChange={(e) => setFiltroEstado(e.target.value)}
+                  className="border px-2 py-[3px] text-xs w-[160px]"
+                >
+                  {estados.map((e) => (
+                    <option key={e.value} value={e.value}>{e.label}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div className="flex flex-wrap gap-4">
+              <label className="flex flex-col text-xs">
+                Fecha de Pago:
+                <input
+                  type="date"
+                  value={filtroFechaPago}
+                  onChange={(e) => setFiltroFechaPago(e.target.value)}
+                  className="border px-2 py-[3px] text-xs w-[160px]"
+                />
+              </label>
+
+              <label className="flex flex-col text-xs">
+                Forma de Pago:
+                <select
+                  value={filtroFormaPago}
+                  onChange={(e) => setFiltroFormaPago(e.target.value)}
+                  className="border px-2 py-[3px] text-xs w-[180px]"
+                >
+                  <option value="">Todas las formas</option>
+                  {formasPago.map(fp => (
+                    <option key={fp.id} value={fp.id}>{fp.forma_de_pago}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div className="flex gap-3 mt-2">
+              <button
+                onClick={buscarCuotas}
+                className="bg-red-700 hover:bg-red-800 text-white px-4 py-1 rounded text-[0.75rem]"
+              >
+                Buscar
+              </button>
+
+              <button
+                onClick={handleExportarExcel}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-[0.75rem]"
+              >
+                <FaFileExcel className="text-sm" />
+                Exportar Excel
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 p-3 rounded-md shadow-sm border text-sm grid gap-1 md:w-1/3">
+            <div><strong>Total cuotas generadas:</strong> {totalCuotas}</div>
+            <div><strong>Total cuotas pagas:</strong> {totalPagas}</div>
+            <div><strong>Total importe generado:</strong> ${totalImporte.toLocaleString("es-AR", { minimumFractionDigits: 2 })}</div>
+            <div><strong>Total importe pagado:</strong> ${totalMontoPagado.toLocaleString("es-AR", { minimumFractionDigits: 2 })}</div>
+            <div><strong>Falta de cobro:</strong> ${totalFaltaCobro.toLocaleString("es-AR", { minimumFractionDigits: 2 })}</div>
+          </div>
         </div>
-
-        {/* Fila 2 */}
-        <div className="flex flex-wrap gap-4">
-          <label className="flex flex-col text-xs">
-            Mes:
-            <input
-              id="mes"
-              type="month"
-              value={filtroMes}
-              onChange={(e) => setFiltroMes(e.target.value)}
-              className="border px-2 py-0 text-xs"
-            />
-          </label>
-
-          <label className="flex flex-col text-xs">
-            Estado:
-            <select
-              id="estado"
-              value={filtroEstado}
-              onChange={(e) => setFiltroEstado(e.target.value)}
-              className="border px-2 py-[3px] text-xs w-[160px]"
-            >
-              {estados.map((e) => (
-                <option key={e.value} value={e.value}>{e.label}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        {/* Fila 3 */}
-        <div className="flex flex-wrap gap-4">
-          <label className="flex flex-col text-xs">
-            Fecha de Pago:
-            <input
-              id="fecha_pago"
-              type="date"
-              value={filtroFechaPago}
-              onChange={(e) => setFiltroFechaPago(e.target.value)}
-              className="border px-2 py-[3px] text-xs w-[160px]"
-            />
-          </label>
-
-          <label className="flex flex-col text-xs">
-            Forma de Pago:
-            <select
-              id="forma_pago"
-              value={filtroFormaPago}
-              onChange={(e) => setFiltroFormaPago(e.target.value)}
-              className="border px-2 py-[3px] text-xs w-[180px]"
-            >
-              <option value="">Todas las formas</option>
-              {formasPago.map(fp => (
-                <option key={fp.id} value={fp.id}>{fp.forma_de_pago}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        {/* Botones */}
-        <div className="flex gap-3 mt-2">
-          <button
-            onClick={buscarCuotas}
-            className="bg-red-700 hover:bg-red-800 text-white px-4 py-1 rounded text-[0.75rem]"
-          >
-            Buscar
-          </button>
-
-          <button
-            onClick={handleExportarExcel}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-[0.75rem]"
-          >
-            <FaFileExcel className="text-sm" />
-            Exportar Excel
-          </button>
-        </div>
-      </div>
-
-      {/* Bloque de totales (derecha) */}
-      <div className="bg-gray-50 p-3 rounded-md shadow-sm border text-sm grid gap-1 md:w-1/3">
-        <div><strong>Total cuotas generadas:</strong> {totalCuotas}</div>
-        <div><strong>Total cuotas pagas:</strong> {totalPagas}</div>
-        <div><strong>Total importe generado:</strong> ${totalImporte.toLocaleString("es-AR", { minimumFractionDigits: 2 })}</div>
-        <div><strong>Total importe pagado:</strong> ${totalMontoPagado.toLocaleString("es-AR", { minimumFractionDigits: 2 })}</div>
-        <div><strong>Falta de cobro:</strong> ${totalFaltaCobro.toLocaleString("es-AR", { minimumFractionDigits: 2 })}</div>
-      </div>
-
-    </div>
-  
 
         {cuotas.length > 0 && (
           <div className="overflow-x-auto rounded-xl shadow ring-1 ring-black/5 bg-white">
