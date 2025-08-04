@@ -101,8 +101,9 @@ export default function VerDatosSocio() {
   }
 
   const formData = new FormData();
+   formData.append("dni", socio.dni);
   formData.append("foto", e.target.files[0]);
-  formData.append("dni", socio.dni);
+ 
   console.log("📸 Subiendo foto para DNI:", socio.dni);
   console.log("🧾 FormData:", formData);
 
