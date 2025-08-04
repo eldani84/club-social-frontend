@@ -29,29 +29,14 @@ export default function VerDatosSocio() {
   const [socio, setSocio] = useState<Socio | null>(null);
   const [editando, setEditando] = useState(false);
   const [mensaje, setMensaje] = useState("");
+  const [fotoPreview, setFotoPreview] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!usuario?.id) {
-      console.warn("⚠️ No hay ID de usuario disponible");
-      return;
-    }
+    if (!usuario?.id) return;
 
-    const url = `${API}/autogestion/socios/${usuario.id}`;
-    console.log("🔍 Cargando datos desde:", url);
-
-    fetch(url)
-      .then(async (res) => {
-        if (!res.ok) {
-          const texto = await res.text();
-          throw new Error(`Error HTTP ${res.status}: ${texto}`);
-        }
-        return res.json();
-      })
+    fetch(`${API}/autogestion/socios/${usuario.id}`)
+      .then((res) => res.json())
       .then((data) => {
-        if (!data || typeof data !== "object") {
-          throw new Error("Respuesta inválida del servidor");
-        }
-
         const socioConValores: Socio = {
           ...data,
           email: data.email ?? "",
@@ -65,10 +50,11 @@ export default function VerDatosSocio() {
           foto_url: data.foto_url ?? ""
         };
         setSocio(socioConValores);
+        setFotoPreview(`${API}${socioConValores.foto_url}`);
       })
       .catch((err) => {
-        console.error("❌ Error al obtener datos del socio:", err.message);
-        setMensaje("❌ Error al cargar los datos. Intente nuevamente.");
+        console.error("❌ Error al cargar socio:", err);
+        setMensaje("❌ Error al cargar los datos del socio");
       });
   }, [usuario]);
 
@@ -88,7 +74,7 @@ export default function VerDatosSocio() {
         direccion: socio?.direccion,
         localidad: socio?.localidad,
         provincia: socio?.provincia,
-        ocupacion: socio?.ocupacion
+        ocupacion: socio?.ocupacion,
       };
 
       const res = await fetch(`${API}/autogestion/socios/${socio?.id}`, {
@@ -107,26 +93,61 @@ export default function VerDatosSocio() {
     }
   };
 
+  const handleFotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !socio) return;
+
+    const formData = new FormData();
+    formData.append("foto", e.target.files[0]);
+    formData.append("dni", socio.dni);
+
+    try {
+      const res = await fetch(`${API}/autogestion/socios/foto`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error al subir foto");
+
+      setFotoPreview(`${API}${data.foto_url}`);
+      setSocio({ ...socio, foto_url: data.foto_url });
+      setMensaje("✅ Foto actualizada correctamente.");
+    } catch (err: any) {
+      console.error("❌ Error al subir foto:", err);
+      setMensaje(`❌ ${err.message}`);
+    }
+  };
+
   if (!socio) return <p>Cargando datos del socio...</p>;
 
   return (
     <div className="p-4 max-w-3xl mx-auto bg-white rounded shadow text-sm">
       <h2 className="text-xl font-semibold mb-4 text-center">
-        Mis datos personales (⚠️ PRUEBA)
+        Mis datos personales
       </h2>
 
       {mensaje && <p className="text-center text-sm mb-4">{mensaje}</p>}
 
+      <div className="flex items-center gap-4 mb-4">
+        {fotoPreview ? (
+          <img src={fotoPreview} alt="Foto del socio" className="w-24 h-24 object-cover rounded-full border" />
+        ) : (
+          <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 text-sm border">
+            Sin foto
+          </div>
+        )}
+        <div>
+          <p className="text-base font-semibold">{socio.apellido} {socio.nombre}</p>
+          <input type="file" accept="image/*" onChange={handleFotoChange} className="text-xs mt-1" />
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[12px]">
-        <label>
-          <strong>Apellido y Nombre:</strong> {socio.apellido} {socio.nombre}
-        </label>
         <label>
           <strong>DNI:</strong> {socio.dni}
         </label>
         <label>
-          <strong>Fecha Nacimiento:</strong>{" "}
-          {new Date(socio.fecha_nacimiento).toLocaleDateString()}
+          <strong>Fecha Nacimiento:</strong> {new Date(socio.fecha_nacimiento).toLocaleDateString()}
         </label>
         <label>
           <strong>Email:</strong><br />
@@ -182,8 +203,7 @@ export default function VerDatosSocio() {
           <strong>Forma de pago:</strong> {socio.forma_de_pago}
         </label>
         <label>
-          <strong>Fecha de alta:</strong>{" "}
-          {new Date(socio.fecha_alta).toLocaleDateString()}
+          <strong>Fecha de alta:</strong> {new Date(socio.fecha_alta).toLocaleDateString()}
         </label>
         <label className="sm:col-span-2">
           <strong>Observaciones:</strong> {socio.observaciones || "-"}
