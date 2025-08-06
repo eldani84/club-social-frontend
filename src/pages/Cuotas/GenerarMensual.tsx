@@ -219,19 +219,21 @@ export default function GenerarMensual() {
       )}
       {/* Overlay mientras se generan cuotas */}
       {generando && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-          <div className="bg-white rounded-xl p-6 shadow-xl flex flex-col items-center">
-            <div className="mb-4 font-bold text-lg text-green-700">
-              Generando cuotas…<br />
-              <span className="text-sm text-gray-500">No cierre ni recargue esta ventana</span>
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center cursor-wait">
+          <div className="bg-white rounded-2xl p-6 shadow-xl max-w-md w-full border border-green-600 text-center">
+            <h2 className="text-xl font-bold text-green-800 mb-2">⏳ Generando cuotas...</h2>
+            <p className="text-sm text-gray-700 mb-3">
+              Este proceso puede tardar entre <b>10 y 30 segundos</b> según la cantidad de socios.<br />
+              Por favor espere, no cierre ni recargue esta ventana.
+            </p>
+            <div className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mb-4">
+              <div className="h-2 bg-green-600 animate-pulse w-4/5"></div>
             </div>
-            <div className="w-64 h-3 bg-gray-200 rounded-full overflow-hidden mb-4">
-              <div className="bg-green-500 h-3 animate-pulse" style={{ width: "80%" }} />
-            </div>
-            <div className="spinner-border text-green-600" style={{ width: 32, height: 32, borderWidth: 4 }}></div>
+            <div className="text-green-600 font-bold text-sm">Procesando...</div>
           </div>
         </div>
       )}
+
       {/* Confirmación y resultado */}
       {confirmar && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
