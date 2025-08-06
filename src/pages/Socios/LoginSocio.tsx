@@ -37,6 +37,7 @@ export default function LoginSocio() {
       // Guardar token y datos del socio
       localStorage.setItem("socioToken", data.token);
       localStorage.setItem("socioData", JSON.stringify(data.socio));
+      localStorage.setItem("socioDni", data.socio.dni);
 
       // Verificación en consola (útil en desarrollo)
       console.log("✅ socioToken:", data.token);

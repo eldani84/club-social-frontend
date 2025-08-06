@@ -32,6 +32,7 @@ import VerCuotasGrupo from "./pages/Socios/VerCuotasGrupo";
 import GenerarLinkPago from "./pages/Socios/GenerarLinkPago";
 import VerSaldosExtra from "./pages/Socios/VerSaldosExtra";
 import VerDatosSocio from "./pages/Socios/VerDatosSocio";
+import CuentaCorriente from "./pages/Socios/CuentaCorriente";
 
 import "./styles/ModernUI.css";
 
@@ -121,6 +122,7 @@ function LayoutPrivado() {
           <Route path="informes/morosidad" element={<InformeMorosidadConsolidada />} />
           <Route path="informes/cuotas" element={<InformeCuotasFiltros />} />
           <Route path="usuarios/crear" element={<CrearUsuario />} />
+          <Route path="/socio/perfil/cuotas" element={<CuentaCorriente />} />
         </Routes>
       </div>
     </div>
