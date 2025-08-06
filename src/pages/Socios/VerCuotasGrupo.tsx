@@ -16,17 +16,19 @@ interface Cuota {
 export default function VerCuotasGrupo() {
   const [cuotas, setCuotas] = useState<Cuota[]>([]);
   const [loading, setLoading] = useState(true);
+  const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const socioData = localStorage.getItem("socioData");
     if (!socioData) return;
 
     const socio = JSON.parse(socioData);
-     console.log("DNI socio:", socio.dni); // 👈 Agregado
-    fetch(`http://localhost:3000/api/cuotas/grupo-familiar?dni=${socio.dni}`)
+    console.log("DNI socio:", socio.dni); // 👈 Log de depuración
+
+    fetch(`${API}/cuotas/grupo-familiar?dni=${socio.dni}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("Cuotas recibidas:", data); // 👈 Agregado
+        console.log("Cuotas recibidas:", data); // 👈 Log de depuración
         setCuotas(data);
         setLoading(false);
       })
@@ -66,4 +68,3 @@ export default function VerCuotasGrupo() {
     </div>
   );
 }
-
