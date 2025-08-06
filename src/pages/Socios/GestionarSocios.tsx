@@ -4,6 +4,8 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import "../../styles/ModernUI.css";
 
+const API = import.meta.env.VITE_API_URL;
+
 interface Socio {
   id: number;
   nombre: string;
@@ -44,15 +46,15 @@ export default function GestionarSocios() {
   const [formasPago, setFormasPago] = useState<FormaPago[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/socios")
+    fetch(`${API}/socios`)
       .then((res) => res.json())
       .then(setSocios);
 
-    fetch("http://localhost:3000/api/categorias")
+    fetch(`${API}/categorias`)
       .then((res) => res.json())
       .then(setCategorias);
 
-    fetch("http://localhost:3000/api/formas_pago")
+    fetch(`${API}/formas_pago`)
       .then((res) => res.json())
       .then(setFormasPago);
   }, []);
@@ -71,7 +73,7 @@ export default function GestionarSocios() {
   const handleGuardar = async () => {
     if (!form || !editandoId) return;
     try {
-      const res = await fetch(`http://localhost:3000/api/socios/${editandoId}`, {
+      const res = await fetch(`${API}/socios/${editandoId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -84,7 +86,7 @@ export default function GestionarSocios() {
       alert("Socio actualizado correctamente");
       setEditandoId(null);
       setForm({});
-      fetch("http://localhost:3000/api/socios")
+      fetch(`${API}/socios`)
         .then((res) => res.json())
         .then(setSocios);
     } catch (err) {
@@ -95,10 +97,10 @@ export default function GestionarSocios() {
   const handleEliminar = async (id: number) => {
     if (!confirm("¿Deseas eliminar este socio?")) return;
     try {
-      const res = await fetch(`http://localhost:3000/api/socios/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API}/socios/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Error al eliminar socio");
       alert("Socio eliminado correctamente");
-      fetch("http://localhost:3000/api/socios")
+      fetch(`${API}/socios`)
         .then((res) => res.json())
         .then(setSocios);
     } catch (err) {
