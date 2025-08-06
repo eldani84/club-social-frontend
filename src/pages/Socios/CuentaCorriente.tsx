@@ -1,77 +1,84 @@
 import { useEffect, useState } from "react";
 
-interface Movimiento {
+type Movimiento = {
   id: string;
-  tipo: string;
+  tipo: "cuota" | "extra";
   descripcion: string;
   monto: number;
   fecha: string;
   link_pago: string | null;
-}
+};
 
 export default function CuentaCorriente() {
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-
-  const dni = localStorage.getItem("socioDni"); // Asegurate de guardar el DNI al loguear
+  const [socioNombre, setSocioNombre] = useState("");
 
   useEffect(() => {
-    const fetchCuentaCorriente = async () => {
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/autogestion/socios/cuenta-corriente/${dni}`
-        );
-        const data = await res.json();
+    const dni = localStorage.getItem("socioDni");
+
+    if (!dni) {
+      console.error("DNI no encontrado en localStorage");
+      return;
+    }
+
+    const API_URL = import.meta.env.VITE_API_URL;
+
+    fetch(`${API_URL}/autogestion/socios/cuenta-corriente/${dni}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) {
+          console.error(data.error);
+          return;
+        }
         setMovimientos(data.movimientos);
         setTotal(data.total_adeudado);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error al cargar cuenta corriente", error);
-        setLoading(false);
-      }
-    };
-
-    if (dni) fetchCuentaCorriente();
-  }, [dni]);
-
-  if (loading) return <p className="p-4">Cargando cuenta corriente...</p>;
+        setSocioNombre(`${data.socio.apellido}, ${data.socio.nombre}`);
+      })
+      .catch((err) => console.error("Error al obtener cuenta corriente:", err))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
-    <div className="p-4 max-w-md mx-auto text-sm">
-      <h2 className="text-xl font-bold mb-4 text-center">Cuenta Corriente</h2>
+    <div className="p-4 text-sm">
+      <h2 className="text-lg font-semibold mb-2">Cuenta Corriente</h2>
+      <p className="mb-4 text-xs text-gray-700">Socio: {socioNombre}</p>
 
-      {movimientos.length === 0 && (
-        <p className="text-center">No hay deudas pendientes 🎉</p>
+      {loading ? (
+        <p>Cargando...</p>
+      ) : movimientos.length === 0 ? (
+        <p>No hay movimientos pendientes.</p>
+      ) : (
+        <ul className="divide-y border rounded shadow-sm bg-white">
+          {movimientos.map((mov) => (
+            <li key={mov.id} className="p-3 flex justify-between items-center">
+              <div>
+                <p className="font-medium">{mov.descripcion}</p>
+                <p className="text-xs text-gray-500">{mov.fecha}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-red-600 font-semibold">
+                  ${mov.monto.toFixed(2)}
+                </p>
+                {mov.link_pago && (
+                  <a
+                    href={mov.link_pago}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 text-xs underline"
+                  >
+                    Pagar
+                  </a>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
 
-      <ul className="space-y-2">
-        {movimientos.map((mov) => (
-          <li key={mov.id} className="border p-2 rounded shadow-sm">
-            <div className="flex justify-between">
-              <span className="font-semibold">{mov.descripcion}</span>
-              <span>${mov.monto.toFixed(2)}</span>
-            </div>
-            <div className="text-xs text-gray-600">
-              {mov.tipo.toUpperCase()} | {new Date(mov.fecha).toLocaleDateString()}
-            </div>
-            {mov.link_pago && (
-              <a
-                href={mov.link_pago}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-center bg-red-600 text-white py-1 mt-2 rounded text-xs hover:bg-red-700"
-              >
-                Pagar
-              </a>
-            )}
-          </li>
-        ))}
-      </ul>
-
-      <div className="mt-6 p-3 text-center bg-gray-100 rounded shadow">
-        <p className="text-sm">Total adeudado:</p>
-        <p className="text-xl font-bold text-red-700">${total.toFixed(2)}</p>
+      <div className="mt-4 border-t pt-4 font-bold text-right text-base">
+        Total adeudado: ${total.toFixed(2)}
       </div>
     </div>
   );
