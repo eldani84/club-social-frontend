@@ -51,38 +51,47 @@ export default function CuentaCorriente() {
         <p>No hay movimientos pendientes.</p>
       ) : (
         <div className="grid gap-4">
-  {movimientos.map((mov) => (
-    <div
-      key={mov.id}
-      className="bg-white shadow-md rounded-lg p-4 flex justify-between items-center"
-    >
-      <div>
-        <p className="text-sm font-medium text-gray-800">{mov.descripcion}</p>
-        <p className="text-xs text-gray-500">{mov.fecha}</p>
-      </div>
-      <div className="text-right">
-        <p className="text-red-600 font-semibold text-base">
-          ${mov.monto.toFixed(2)}
-        </p>
-        {mov.link_pago && (
-          <a
-            href={mov.link_pago}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline text-sm"
-          >
-            Pagar
-          </a>
-        )}
-      </div>
-    </div>
-  ))}
-</div>
-
+          {movimientos.map((mov) => (
+            <div
+              key={mov.id}
+              className="bg-white shadow-md rounded-lg p-4 flex justify-between items-center"
+            >
+              <div>
+                <p className="text-sm font-medium text-gray-800">{mov.descripcion}</p>
+                <p className="text-xs text-gray-500">{mov.fecha}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-red-600 font-semibold text-base">
+                  ${mov.monto.toFixed(2)}
+                </p>
+                {mov.link_pago && (
+                  <a
+                    href={mov.link_pago}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline text-sm"
+                  >
+                    Pagar
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
-      <div className="mt-4 border-t pt-4 font-bold text-right text-base">
-        Total adeudado: ${total.toFixed(2)}
+      <div className="mt-6 text-right">
+        <p className="text-base font-bold">
+          Total adeudado: <span className="text-red-600">${total.toFixed(2)}</span>
+        </p>
+
+        {/* Botón de pago total (sin funcionalidad aún) */}
+        <button
+          className="mt-3 bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2 px-4 rounded shadow"
+          onClick={() => alert("Este botón generará el link de pago total")}
+        >
+          Pagar Total
+        </button>
       </div>
     </div>
   );
