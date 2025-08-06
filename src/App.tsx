@@ -28,7 +28,7 @@ import LoginSocio from "./pages/Socios/LoginSocio";
 import PerfilSocioDashboard from "./pages/Socios/PerfilSocioDashboard";
 import CambiarClaveSocio from "./pages/Socios/CambiarClaveSocio";
 import VerGrupoFamiliar from "./pages/Socios/VerGrupoFamiliar";
-import VerCuotasGrupo from "./pages/Socios/VerCuotasGrupo";
+
 import GenerarLinkPago from "./pages/Socios/GenerarLinkPago";
 import VerSaldosExtra from "./pages/Socios/VerSaldosExtra";
 import VerDatosSocio from "./pages/Socios/VerDatosSocio";
@@ -122,7 +122,8 @@ function LayoutPrivado() {
           <Route path="informes/morosidad" element={<InformeMorosidadConsolidada />} />
           <Route path="informes/cuotas" element={<InformeCuotasFiltros />} />
           <Route path="usuarios/crear" element={<CrearUsuario />} />
-          <Route path="/socio/perfil/cuotas" element={<CuentaCorriente />} />
+          
+          
         </Routes>
       </div>
     </div>
@@ -136,7 +137,7 @@ function LayoutSocio() {
       <Route path="perfil/datos" element={<VerDatosSocio />} />
       <Route path="perfil/cambiar-clave" element={<CambiarClaveSocio />} />
       <Route path="perfil/grupo" element={<VerGrupoFamiliar />} />
-      <Route path="perfil/cuotas" element={<VerCuotasGrupo />} />
+      <Route path="/socio/perfil/cuotas" element={<CuentaCorriente />} />
       <Route path="perfil/link-pago" element={<GenerarLinkPago />} />
       <Route path="perfil/saldos" element={<VerSaldosExtra />} />
     </Routes>
