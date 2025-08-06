@@ -218,21 +218,31 @@ export default function GenerarMensual() {
         </div>
       )}
       {/* Overlay mientras se generan cuotas */}
-      {generando && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center cursor-wait">
-          <div className="bg-white rounded-2xl p-6 shadow-xl max-w-md w-full border border-green-600 text-center">
-            <h2 className="text-xl font-bold text-green-800 mb-2">⏳ Generando cuotas...</h2>
-            <p className="text-sm text-gray-700 mb-3">
-              Este proceso puede tardar entre <b>10 y 30 segundos</b> según la cantidad de socios.<br />
-              Por favor espere, no cierre ni recargue esta ventana.
-            </p>
-            <div className="w-full h-2 bg-gray-300 rounded-full overflow-hidden mb-4">
-              <div className="h-2 bg-green-600 animate-pulse w-4/5"></div>
+              {generando && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center cursor-wait"
+            style={{ pointerEvents: "auto" }}
+          >
+            <div
+              className="bg-white text-center p-6 rounded-2xl shadow-2xl border border-green-800 max-w-md w-full mx-4"
+              style={{ pointerEvents: "auto" }}
+            >
+              <h2 className="text-2xl font-bold text-green-800 mb-3">
+                ⏳ Procesando...
+              </h2>
+              <p className="text-sm text-gray-700 mb-4">
+                Estamos generando las cuotas mensuales.<br />
+                Esto puede tardar hasta <strong>30 segundos</strong>.<br />
+                <span className="text-red-600 font-semibold">No cierre ni recargue la ventana.</span>
+              </p>
+              <div className="w-full h-3 bg-gray-300 rounded-full overflow-hidden mb-4">
+                <div className="bg-green-600 h-3 animate-pulse w-4/5" />
+              </div>
+              <div className="text-green-700 font-semibold text-sm">Generando cuotas...</div>
             </div>
-            <div className="text-green-600 font-bold text-sm">Procesando...</div>
           </div>
-        </div>
-      )}
+        )}
+
 
       {/* Confirmación y resultado */}
       {confirmar && (
