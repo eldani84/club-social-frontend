@@ -50,31 +50,35 @@ export default function CuentaCorriente() {
       ) : movimientos.length === 0 ? (
         <p>No hay movimientos pendientes.</p>
       ) : (
-        <ul className="divide-y border rounded shadow-sm bg-white">
-          {movimientos.map((mov) => (
-            <li key={mov.id} className="p-3 flex justify-between items-center">
-              <div>
-                <p className="font-medium">{mov.descripcion}</p>
-                <p className="text-xs text-gray-500">{mov.fecha}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-red-600 font-semibold">
-                  ${mov.monto.toFixed(2)}
-                </p>
-                {mov.link_pago && (
-                  <a
-                    href={mov.link_pago}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 text-xs underline"
-                  >
-                    Pagar
-                  </a>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div className="grid gap-4">
+  {movimientos.map((mov) => (
+    <div
+      key={mov.id}
+      className="bg-white shadow-md rounded-lg p-4 flex justify-between items-center"
+    >
+      <div>
+        <p className="text-sm font-medium text-gray-800">{mov.descripcion}</p>
+        <p className="text-xs text-gray-500">{mov.fecha}</p>
+      </div>
+      <div className="text-right">
+        <p className="text-red-600 font-semibold text-base">
+          ${mov.monto.toFixed(2)}
+        </p>
+        {mov.link_pago && (
+          <a
+            href={mov.link_pago}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline text-sm"
+          >
+            Pagar
+          </a>
+        )}
+      </div>
+    </div>
+  ))}
+</div>
+
       )}
 
       <div className="mt-4 border-t pt-4 font-bold text-right text-base">
