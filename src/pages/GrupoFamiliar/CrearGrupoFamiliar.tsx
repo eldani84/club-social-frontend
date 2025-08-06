@@ -5,11 +5,12 @@ type Socio = {
   nombre: string;
   apellido: string;
   dni: string;
+  grupo_familiar_id?: number | null;
 };
 
 export default function CrearGrupoFamiliar() {
   const [socios, setSocios] = useState<Socio[]>([]);
-  const [query, setQuery] = useState("");
+  const [busqueda, setBusqueda] = useState("");
   const [resultados, setResultados] = useState<Socio[]>([]);
   const [seleccionados, setSeleccionados] = useState<Socio[]>([]);
   const [idTitular, setIdTitular] = useState<number | null>(null);
@@ -25,26 +26,27 @@ export default function CrearGrupoFamiliar() {
   }, []);
 
   useEffect(() => {
-    if (query.trim() === "") {
+    const valor = busqueda.trim().toLowerCase();
+    if (valor.length < 2) {
       setResultados([]);
       return;
     }
-    const q = query.toLowerCase();
     setResultados(
       socios
         .filter(
           (s) =>
-            s.nombre.toLowerCase().includes(q) ||
-            s.apellido.toLowerCase().includes(q) ||
-            (s.dni && s.dni.includes(q))
+            s.nombre.toLowerCase().includes(valor) ||
+            s.apellido.toLowerCase().includes(valor) ||
+            s.dni.toLowerCase().includes(valor) ||
+            (`${s.nombre} ${s.apellido}`).toLowerCase().includes(valor)
         )
         .filter((s) => !seleccionados.some((sel) => sel.id === s.id))
     );
-  }, [query, socios, seleccionados]);
+  }, [busqueda, socios, seleccionados]);
 
   const agregarSocio = (socio: Socio) => {
     setSeleccionados([...seleccionados, socio]);
-    setQuery("");
+    setBusqueda("");
     setResultados([]);
   };
 
@@ -90,27 +92,46 @@ export default function CrearGrupoFamiliar() {
     <form className="form-modern" onSubmit={handleSubmit}>
       <div className="form-section-title">Crear Grupo Familiar</div>
 
-      <label>Buscar socio (nombre, apellido o DNI):</label>
-      <div style={{ position: "relative" }}>
+      <label>Buscar socio (DNI, nombre o apellido):</label>
+      <div style={{ position: "relative", marginBottom: 16 }}>
         <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ej: Juampi, Donnet, 30123123..."
+          type="text"
+          placeholder="Buscar..."
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
           autoComplete="off"
+          style={{ width: 260 }}
         />
         {resultados.length > 0 && (
           <ul
-            className="dropdown-results"
             style={{
+              border: "1.5px solid #b91c1c88",
               position: "absolute",
-              top: "100%",
-              zIndex: 50,
-              width: "100%",
+              zIndex: 30,
+              background: "#fff",
+              width: 320,
+              maxHeight: 150,
+              overflowY: "auto",
+              paddingLeft: 0,
+              marginTop: 2,
+              borderRadius: 8,
+              listStyle: "none",
+              boxShadow: "0 4px 12px #b91c1c15"
             }}
           >
             {resultados.map((s) => (
-              <li key={s.id} onMouseDown={(e) => e.preventDefault()} onClick={() => agregarSocio(s)}>
-                {s.nombre} {s.apellido} ({s.dni})
+              <li
+                key={s.id}
+                style={{
+                  cursor: "pointer",
+                  padding: "6px 12px",
+                  borderBottom: "1px solid #eee",
+                  borderRadius: 6
+                }}
+                onClick={() => agregarSocio(s)}
+                onMouseDown={(e) => e.preventDefault()}
+              >
+                <b>{s.nombre} {s.apellido}</b> — DNI: {s.dni}
               </li>
             ))}
           </ul>
