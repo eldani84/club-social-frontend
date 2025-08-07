@@ -1,28 +1,32 @@
-import { useEffect, useState } from "react";
 
-interface Movimiento {
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+
+type Movimiento = {
   tipo: string;
   descripcion: string;
   monto: number;
-  mes: string;
-}
+  fecha: string;
+};
 
-interface DetalleMensual {
+type DetalleMensual = {
   mes: string;
   saldo: number;
   movimientos: Movimiento[];
-}
+};
 
 export default function CuentaCorrienteDetalle() {
+  const { dni } = useParams();
   const [detalle, setDetalle] = useState<DetalleMensual[]>([]);
   const [loading, setLoading] = useState(true);
-  const dni = localStorage.getItem("socioDni");
+
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const fetchDetalle = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL;
         const res = await fetch(`${API_URL}/autogestion/socios/cuenta-corriente/detalle/${dni}`);
+        if (!res.ok) throw new Error("No se pudo obtener el detalle de cuenta corriente");
         const data = await res.json();
         setDetalle(data.detalle || []);
       } catch (error) {
@@ -32,57 +36,52 @@ export default function CuentaCorrienteDetalle() {
       }
     };
 
-    fetchDetalle();
+    if (dni) fetchDetalle();
   }, [dni]);
 
-  if (loading) return <div className="p-4 text-center">Cargando...</div>;
+  if (loading) return <div className="text-center mt-8">Cargando detalle...</div>;
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
-      <h2 className="text-xl font-semibold mb-4">Cuenta Corriente Detallada</h2>
+    <div className="max-w-3xl mx-auto p-4">
+      <h2 className="text-xl font-bold mb-4 text-center">Detalle de Cuenta Corriente</h2>
 
       {detalle.length === 0 ? (
-        <p className="text-center text-gray-500">No hay movimientos registrados.</p>
+        <p className="text-center text-gray-500">No hay movimientos disponibles.</p>
       ) : (
-        detalle.map((mesDetalle) => (
-          <div key={mesDetalle.mes} className="bg-white rounded shadow-sm mb-6">
-            {/* Encabezado mes */}
-            <div className="flex justify-between bg-gray-100 px-4 py-2 border-b">
-              <span className="font-medium">{mesDetalle.mes}</span>
-              <span className="font-semibold text-right">
-                Saldo:{" "}
-                <span className={mesDetalle.saldo < 0 ? "text-red-600" : "text-green-600"}>
-                  {mesDetalle.saldo.toLocaleString("es-AR", {
-                    style: "currency",
-                    currency: "ARS",
-                  })}
-                </span>
+        detalle.map(({ mes, saldo, movimientos }) => (
+          <div key={mes} className="bg-white shadow-md rounded-md p-4 mb-6 border border-gray-200">
+            <div className="flex justify-between items-center mb-2 border-b pb-2">
+              <h3 className="text-lg font-semibold text-gray-700 capitalize">
+                {new Date(`${mes}-01`).toLocaleDateString("es-AR", {
+                  year: "numeric",
+                  month: "long",
+                })}
+              </h3>
+              <span
+                className={`text-sm font-bold ${
+                  saldo > 0 ? "text-green-600" : saldo < 0 ? "text-red-600" : "text-gray-600"
+                }`}
+              >
+                Saldo: {saldo.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
               </span>
             </div>
 
-            {/* Lista de movimientos */}
-            <ul className="divide-y">
-              {mesDetalle.movimientos.map((mov, idx) => (
-                <li key={idx} className="flex justify-between px-4 py-2 text-sm">
-                  <span className="text-gray-800">{mov.descripcion}</span>
-                  <span
-                    className={`${
-                      mov.monto < 0 ? "text-red-600" : "text-green-600"
-                    } font-semibold`}
-                  >
-                    {(mov.monto >= 0 ? "+" : "-") +
-                      Math.abs(mov.monto).toLocaleString("es-AR", {
-                        style: "currency",
-                        currency: "ARS",
-                      })}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            {movimientos.map((mov, index) => (
+              <div key={index} className="flex justify-between py-2 border-b last:border-b-0">
+                <span className="text-sm text-gray-700">{mov.descripcion}</span>
+                <span
+                  className={`text-sm font-medium ${
+                    mov.monto > 0 ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {mov.monto > 0 ? "+" : ""}
+                  {mov.monto.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                </span>
+              </div>
+            ))}
           </div>
         ))
       )}
     </div>
   );
 }
-
