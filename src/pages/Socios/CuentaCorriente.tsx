@@ -1,125 +1,75 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-
-interface Movimiento {
-  id: string;
-  tipo: string;
-  descripcion: string;
-  monto: number;
-  fecha: string;
-  link_pago?: string | null;
-}
+import { useNavigate } from "react-router-dom";
 
 interface Socio {
   id: number;
   nombre: string;
   apellido: string;
-  grupo_familiar_id?: number | null;
+  grupo_familiar_id: number | null;
   es_titular: boolean;
 }
 
-export default function CuentaCorriente() {
-  const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
-  const [total, setTotal] = useState(0);
-  const [socio, setSocio] = useState<Socio | null>(null);
 
-  const dni = localStorage.getItem("socioDni");
-  const API_URL = import.meta.env.VITE_API_URL;
+
+export default function CuentaCorriente() {
+  const [socio, setSocio] = useState<Socio | null>(null);
+  const [totalAdeudado, setTotalAdeudado] = useState<number>(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const obtenerCuentaCorriente = async () => {
-      try {
-        const res = await fetch(`${API_URL}/autogestion/socios/cuenta-corriente/${dni}`);
-        const data = await res.json();
-        setMovimientos(data.movimientos || []);
-        setTotal(data.total_adeudado || 0);
-        setSocio(data.socio || null);
-      } catch (error) {
-        console.error("Error al obtener la cuenta corriente:", error);
-      }
-    };
+    const socioData = localStorage.getItem("socioData");
+    if (!socioData) return;
 
-    if (dni) {
-      obtenerCuentaCorriente();
-    }
-  }, [API_URL, dni]);
+    const dni = JSON.parse(socioData).dni;
+    const API_URL = import.meta.env.VITE_API_URL;
+
+    fetch(`${API_URL}/autogestion/socios/cuenta-corriente/${dni}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setSocio(data.socio);
+        setTotalAdeudado(data.total_adeudado);
+      })
+      .catch((err) => {
+        console.error("Error al cargar cuenta corriente", err);
+      });
+  }, []);
 
   return (
-    <div className="max-w-3xl mx-auto mt-6 px-4">
-      <h2 className="text-xl font-semibold mb-4 text-gray-800">Cuenta Corriente</h2>
+    <div className="p-4 max-w-2xl mx-auto">
+      <h2 className="text-xl font-semibold mb-4 text-center">Cuenta Corriente</h2>
 
-      {socio && (
-        <div className="bg-white p-4 rounded-lg shadow-md mb-4">
-          <p className="text-sm text-gray-600 mb-1">
-            <strong>Socio:</strong> {socio.nombre} {socio.apellido}
-          </p>
-          {socio.es_titular && (
-            <p className="text-sm text-gray-600">
-              <strong>Grupo familiar:</strong> Sí
+      <div className="bg-white shadow-sm rounded-lg p-4 space-y-4">
+        {socio && (
+          <>
+            <p className="text-sm text-gray-700">
+              <strong>Socio:</strong> {socio.nombre} {socio.apellido}
             </p>
-          )}
-        </div>
-      )}
+            <p className="text-sm text-gray-700">
+              <strong>Grupo familiar:</strong> {socio.grupo_familiar_id ? "Sí" : "No"}
+            </p>
+          </>
+        )}
 
-      <div className="space-y-4">
-        {movimientos.map((mov) => (
-          <div
-            key={mov.id}
-            className="bg-white rounded-lg shadow-sm p-4 flex justify-between items-center"
-          >
-            <div>
-              <p className="text-sm text-gray-700">{mov.descripcion}</p>
-              <p className="text-xs text-gray-500">{new Date(mov.fecha).toLocaleDateString()}</p>
-            </div>
-            <div className="text-right">
-              <p
-                className={`text-sm font-medium ${
-                  mov.monto >= 0 ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {mov.monto >= 0 ? "+" : "-"}${Math.abs(mov.monto).toLocaleString("es-AR", {
-                  minimumFractionDigits: 2,
-                })}
-              </p>
-              {mov.link_pago && (
-                <a
-                  href={mov.link_pago}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-blue-600 underline mt-1 inline-block"
-                >
-                  Pagar
-                </a>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-6 text-center">
-        <p className="text-lg font-semibold text-gray-800">
-          Total a pagar:{" "}
-          <span className="text-red-600">
-            ${total.toLocaleString("es-AR", { minimumFractionDigits: 2 })}
+        <div className="flex justify-between items-center border-t pt-4">
+          <span className="text-lg font-semibold">Total a pagar:</span>
+          <span className="text-lg font-bold text-red-600">
+            ${totalAdeudado.toLocaleString("es-AR", { minimumFractionDigits: 2 })}
           </span>
-        </p>
+        </div>
 
-        <div className="mt-4 flex flex-col sm:flex-row justify-center gap-4">
-          {/* Botón de pago total (para futura implementación) */}
+        <div className="flex justify-between gap-2 pt-2">
           <button
-            className="bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-4 rounded shadow"
-            disabled
+            onClick={() => alert("🔧 Pago total próximamente")}
+            className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded text-sm"
           >
             Pago total
           </button>
-
-          {/* ✅ Botón para ver el detalle mensual */}
-          <Link
-            to="/socio/cuenta-corriente/detalle"
-            className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm py-2 px-4 rounded shadow text-center"
+          <button
+            onClick={() => navigate("/socio/cuenta-corriente/detalle")}
+            className="flex-1 border border-red-600 text-red-600 hover:bg-red-100 py-2 px-4 rounded text-sm"
           >
-            Ver detalle mensual
-          </Link>
+            Ver detalle
+          </button>
         </div>
       </div>
     </div>

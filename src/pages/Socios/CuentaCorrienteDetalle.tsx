@@ -1,82 +1,81 @@
-// src/pages/Socios/CuentaCorrienteDetalle.tsx
 import { useEffect, useState } from "react";
 
-type Movimiento = {
-  id: string;
-  tipo: "cuota" | "pago" | "extra";
+interface Movimiento {
+  tipo: string;
   descripcion: string;
   monto: number;
-  fecha: string;
-  nombre?: string; // solo para cuotas o extras
-};
+  mes: string;
+}
 
-type MesAgrupado = {
+interface DetalleMensual {
   mes: string;
   saldo: number;
   movimientos: Movimiento[];
-};
+}
 
 export default function CuentaCorrienteDetalle() {
-  const [datos, setDatos] = useState<MesAgrupado[]>([]);
+  const [detalle, setDetalle] = useState<DetalleMensual[]>([]);
   const [loading, setLoading] = useState(true);
   const dni = localStorage.getItem("socioDni");
 
   useEffect(() => {
-    if (!dni) return;
+    const fetchDetalle = async () => {
+      try {
+        const API_URL = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${API_URL}/autogestion/socios/cuenta-corriente/detalle/${dni}`);
+        const data = await res.json();
+        setDetalle(data.detalle || []);
+      } catch (error) {
+        console.error("Error al obtener el detalle de cuenta corriente:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const API_URL = import.meta.env.VITE_API_URL;
-    fetch(`${API_URL}/autogestion/socios/cuenta-corriente/detalle/${dni}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data || !Array.isArray(data)) return;
-        setDatos(data);
-      })
-      .catch((err) => console.error("Error al obtener detalle:", err))
-      .finally(() => setLoading(false));
-  }, []);
+    fetchDetalle();
+  }, [dni]);
 
-  const formatoMoneda = (valor: number) =>
-    (valor < 0 ? "-" : "") + "$" + Math.abs(valor).toLocaleString("es-AR", { minimumFractionDigits: 2 });
+  if (loading) return <div className="p-4 text-center">Cargando...</div>;
 
   return (
-    <div className="p-4 space-y-6">
-      <h2 className="text-lg font-semibold text-gray-800">Detalle Mensual</h2>
+    <div className="p-4 max-w-3xl mx-auto">
+      <h2 className="text-xl font-semibold mb-4">Cuenta Corriente Detallada</h2>
 
-      {loading ? (
-        <p>Cargando...</p>
-      ) : datos.length === 0 ? (
-        <p>No hay movimientos registrados.</p>
+      {detalle.length === 0 ? (
+        <p className="text-center text-gray-500">No hay movimientos registrados.</p>
       ) : (
-        datos.map((mes) => (
-          <div key={mes.mes} className="bg-white rounded-lg shadow-md p-4 space-y-3">
-            <div className="flex justify-between items-center border-b pb-2">
-              <h3 className="text-base font-semibold text-gray-700 capitalize">
-                Mes {mes.mes}
-              </h3>
-              <p className="text-sm font-bold text-gray-800">
-                Saldo: {formatoMoneda(mes.saldo)}
-              </p>
+        detalle.map((mesDetalle) => (
+          <div key={mesDetalle.mes} className="bg-white rounded shadow-sm mb-6">
+            {/* Encabezado mes */}
+            <div className="flex justify-between bg-gray-100 px-4 py-2 border-b">
+              <span className="font-medium">{mesDetalle.mes}</span>
+              <span className="font-semibold text-right">
+                Saldo:{" "}
+                <span className={mesDetalle.saldo < 0 ? "text-red-600" : "text-green-600"}>
+                  {mesDetalle.saldo.toLocaleString("es-AR", {
+                    style: "currency",
+                    currency: "ARS",
+                  })}
+                </span>
+              </span>
             </div>
 
+            {/* Lista de movimientos */}
             <ul className="divide-y">
-              {mes.movimientos.map((mov, idx) => (
-                <li key={mov.id + idx} className="py-2 flex justify-between text-sm">
-                  <div className="text-gray-700">
-                    {mov.tipo === "pago" ? (
-                      <span className="font-medium">PAGO {mov.fecha}</span>
-                    ) : (
-                      <span className="capitalize">
-                        {mov.descripcion} {mov.nombre ? `- ${mov.nombre}` : ""}
-                      </span>
-                    )}
-                  </div>
-                  <div
-                    className={`font-semibold ${
-                      mov.monto >= 0 ? "text-green-600" : "text-red-600"
-                    }`}
+              {mesDetalle.movimientos.map((mov, idx) => (
+                <li key={idx} className="flex justify-between px-4 py-2 text-sm">
+                  <span className="text-gray-800">{mov.descripcion}</span>
+                  <span
+                    className={`${
+                      mov.monto < 0 ? "text-red-600" : "text-green-600"
+                    } font-semibold`}
                   >
-                    {formatoMoneda(mov.monto)}
-                  </div>
+                    {(mov.monto >= 0 ? "+" : "-") +
+                      Math.abs(mov.monto).toLocaleString("es-AR", {
+                        style: "currency",
+                        currency: "ARS",
+                      })}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -86,3 +85,4 @@ export default function CuentaCorrienteDetalle() {
     </div>
   );
 }
+
