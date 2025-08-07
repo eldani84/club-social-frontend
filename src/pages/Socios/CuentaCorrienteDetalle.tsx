@@ -38,40 +38,74 @@ export default function CuentaCorrienteDetalle() {
     if (dni) fetchDetalle();
   }, [dni, API_URL]);
 
-  const handleGenerarLink = async (mov: Movimiento) => {
-    // Solo permitimos generar link para deuda (cuota o extra)
-    if (mov.tipo === "pago") return;
-    try {
-      const res = await fetch(`${API_URL}/autogestion/socios/cuenta-corriente/generar-link`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tipo: mov.tipo,     // "cuota" | "extra"
-          item_id: mov.id,    // id real del registro
-        }),
-      });
-      const data = await res.json();
+const handleGenerarLink = async (mov: Movimiento) => {
+  // Solo para deudas
+  if (mov.tipo === "pago") return;
 
-      if (res.ok && data.link_pago) {
-        // Actualizamos el link en el movimiento correspondiente
-        setDetalle(prev =>
-          prev.map(mesDetalle => ({
-            ...mesDetalle,
-            movimientos: mesDetalle.movimientos.map(m =>
-              m.id === mov.id && m.tipo === mov.tipo
-                ? { ...m, link_pago: data.link_pago }
-                : m
-            ),
-          }))
-        );
-      } else {
-        alert(data.error || "No se pudo generar el link de pago.");
-      }
-    } catch (error) {
-      console.error("Error al generar link:", error);
-      alert("Error al generar link.");
+  // Validar tipo
+  const tipo =
+    mov.tipo === "cuota" ? "cuota" :
+    mov.tipo === "extra" ? "extra" : null;
+
+  if (!tipo) {
+    console.warn("❌ Tipo inválido para generar link:", mov.tipo, mov);
+    alert("No se puede generar link para este tipo de movimiento.");
+    return;
+  }
+
+  // Forzar item_id numérico (por si viene como string tipo 'cuota-123')
+  const item_id = typeof mov.id === "number"
+    ? mov.id
+    : parseInt(String(mov.id).replace(/\D/g, ""), 10);
+
+  if (!item_id || Number.isNaN(item_id)) {
+    console.warn("❌ item_id inválido:", mov.id, mov);
+    alert("No se pudo identificar el ítem para generar el link.");
+    return;
+  }
+
+  try {
+    console.log("➡️ POST generar-link payload:", { tipo, item_id });
+    const res = await fetch(`${API_URL}/autogestion/socios/cuenta-corriente/generar-link`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tipo, item_id }),
+    });
+
+    const text = await res.text();
+    let data: any = {};
+    try { data = JSON.parse(text); } catch { data = { raw: text }; }
+
+    console.log("⬅️ generar-link response:", res.status, data);
+
+    if (!res.ok) {
+      alert(
+        data?.error
+          || (typeof data?.raw === "string" ? data.raw : "No se pudo generar el link (400).")
+      );
+      return;
     }
-  };
+
+    if (data.link_pago) {
+      setDetalle(prev =>
+        prev.map(mesDetalle => ({
+          ...mesDetalle,
+          movimientos: mesDetalle.movimientos.map(m =>
+            ( (typeof m.id === "number" ? m.id : parseInt(String(m.id).replace(/\D/g, ""), 10)) === item_id )
+            && m.tipo === tipo
+              ? { ...m, link_pago: data.link_pago }
+              : m
+          ),
+        }))
+      );
+    } else {
+      alert("No vino link de pago en la respuesta.");
+    }
+  } catch (error) {
+    console.error("Error al generar link:", error);
+    alert("Error al generar link.");
+  }
+};
 
   if (loading) return <div className="text-center mt-8">Cargando detalle...</div>;
 
