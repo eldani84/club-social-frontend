@@ -137,11 +137,13 @@ function LayoutSocio() {
       <Route path="perfil/datos" element={<VerDatosSocio />} />
       <Route path="perfil/cambiar-clave" element={<CambiarClaveSocio />} />
       <Route path="perfil/grupo" element={<VerGrupoFamiliar />} />
-      <Route path="perfil/cuotas" element={<CuentaCorriente />} />  {/* ✅ CORRECTO */}
+      <Route path="perfil/cuotas" element={<CuentaCorriente />} />
       <Route path="perfil/link-pago" element={<GenerarLinkPago />} />
       <Route path="perfil/saldos" element={<VerSaldosExtra />} />
-      <Route path="/socio/cuenta-corriente/detalle/:dni" element={<CuentaCorrienteDetalle />} />
 
+      {/* ✅ CORREGIDA */}
+      <Route path="cuenta-corriente/detalle/:dni" element={<CuentaCorrienteDetalle />} />
     </Routes>
   );
 }
+
