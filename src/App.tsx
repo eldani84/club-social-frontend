@@ -33,7 +33,7 @@ import GenerarLinkPago from "./pages/Socios/GenerarLinkPago";
 import VerSaldosExtra from "./pages/Socios/VerSaldosExtra";
 import VerDatosSocio from "./pages/Socios/VerDatosSocio";
 import CuentaCorriente from "./pages/Socios/CuentaCorriente";
-
+import CuentaCorrienteDetalle from "./pages/Socios/CuentaCorrienteDetalle";
 import "./styles/ModernUI.css";
 
 export default function App() {
@@ -140,6 +140,7 @@ function LayoutSocio() {
       <Route path="perfil/cuotas" element={<CuentaCorriente />} />  {/* ✅ CORRECTO */}
       <Route path="perfil/link-pago" element={<GenerarLinkPago />} />
       <Route path="perfil/saldos" element={<VerSaldosExtra />} />
+      <Route path="/socio/cuenta-corriente/detalle" element={<CuentaCorrienteDetalle />} />
     </Routes>
   );
 }
