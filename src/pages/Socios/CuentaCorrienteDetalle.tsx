@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 type Movimiento = {
-  tipo: string;
+  id: number | string;            // 👈 ahora usamos el id
+  tipo: "cuota" | "extra" | "pago";
   descripcion: string;
   monto: number;
   fecha: string;
@@ -34,40 +35,37 @@ export default function CuentaCorrienteDetalle() {
         setLoading(false);
       }
     };
-
     if (dni) fetchDetalle();
-  }, [dni]);
+  }, [dni, API_URL]);
 
   const handleGenerarLink = async (mov: Movimiento) => {
-    if (!dni || !mov.descripcion || !mov.monto) return;
-
+    // Solo permitimos generar link para deuda (cuota o extra)
+    if (mov.tipo === "pago") return;
     try {
       const res = await fetch(`${API_URL}/autogestion/socios/cuenta-corriente/generar-link`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          descripcion: mov.descripcion,
-          monto: mov.monto,
-          dni,
+          tipo: mov.tipo,     // "cuota" | "extra"
+          item_id: mov.id,    // id real del registro
         }),
       });
-
       const data = await res.json();
 
       if (res.ok && data.link_pago) {
-        // Reemplazar link en el estado
-        setDetalle((prev) =>
-          prev.map((mesDetalle) => ({
+        // Actualizamos el link en el movimiento correspondiente
+        setDetalle(prev =>
+          prev.map(mesDetalle => ({
             ...mesDetalle,
-            movimientos: mesDetalle.movimientos.map((m) =>
-              m.descripcion === mov.descripcion && m.monto === mov.monto && m.fecha === mov.fecha
+            movimientos: mesDetalle.movimientos.map(m =>
+              m.id === mov.id && m.tipo === mov.tipo
                 ? { ...m, link_pago: data.link_pago }
                 : m
             ),
           }))
         );
       } else {
-        alert("No se pudo generar el link de pago.");
+        alert(data.error || "No se pudo generar el link de pago.");
       }
     } catch (error) {
       console.error("Error al generar link:", error);
@@ -88,10 +86,7 @@ export default function CuentaCorrienteDetalle() {
           .sort((a, b) => b.mes.localeCompare(a.mes))
           .slice(0, 3)
           .map(({ mes, saldo, movimientos }) => (
-            <div
-              key={mes}
-              className="bg-white shadow-md rounded-xl border border-gray-200 mb-6"
-            >
+            <div key={mes} className="bg-white shadow-md rounded-xl border border-gray-200 mb-6">
               {/* Encabezado del mes */}
               <div className="flex items-center justify-between px-4 py-3 border-b">
                 <div className="text-base font-semibold text-gray-800">
@@ -102,11 +97,7 @@ export default function CuentaCorrienteDetalle() {
                 </div>
                 <div
                   className={`text-base font-bold ${
-                    saldo > 0
-                      ? "text-green-600"
-                      : saldo < 0
-                      ? "text-red-600"
-                      : "text-gray-700"
+                    saldo > 0 ? "text-green-600" : saldo < 0 ? "text-red-600" : "text-gray-700"
                   }`}
                 >
                   Saldo:{" "}
@@ -129,9 +120,9 @@ export default function CuentaCorrienteDetalle() {
                 {movimientos.length === 0 ? (
                   <div className="py-4 text-sm text-gray-500">Sin movimientos este mes.</div>
                 ) : (
-                  movimientos.map((m, i) => (
+                  movimientos.map((m) => (
                     <div
-                      key={i}
+                      key={`${m.tipo}-${m.id}-${m.fecha}`}
                       className="grid grid-cols-[1fr,140px,120px] gap-3 py-2 border-b last:border-b-0"
                     >
                       <div className="text-sm text-gray-800">{m.descripcion}</div>
@@ -150,7 +141,9 @@ export default function CuentaCorrienteDetalle() {
                       </div>
 
                       <div className="text-right">
-                        {m.link_pago ? (
+                        {m.tipo === "pago" ? (
+                          <span className="text-xs text-gray-400">—</span>
+                        ) : m.link_pago ? (
                           <a
                             href={m.link_pago}
                             target="_blank"
