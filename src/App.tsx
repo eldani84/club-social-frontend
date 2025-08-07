@@ -140,7 +140,8 @@ function LayoutSocio() {
       <Route path="perfil/cuotas" element={<CuentaCorriente />} />  {/* ✅ CORRECTO */}
       <Route path="perfil/link-pago" element={<GenerarLinkPago />} />
       <Route path="perfil/saldos" element={<VerSaldosExtra />} />
-      <Route path="cuenta-corriente/detalle" element={<CuentaCorrienteDetalle />} />
+      <Route path="/socio/cuenta-corriente/detalle/:dni" element={<CuentaCorrienteDetalle />} />
+
     </Routes>
   );
 }
