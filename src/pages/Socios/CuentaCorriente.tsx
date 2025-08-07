@@ -64,12 +64,12 @@ export default function CuentaCorriente() {
           >
             Pago total
           </button>
-          <button
-            onClick={() => navigate("/socio/cuenta-corriente/detalle")}
+            <button
+            onClick={() => navigate(`/socio/cuenta-corriente/detalle/${JSON.parse(localStorage.getItem("socioData") || "{}").dni}`)}
             className="flex-1 border border-red-600 text-red-600 hover:bg-red-100 py-2 px-4 rounded text-sm"
-          >
+            >
             Ver detalle
-          </button>
+            </button>
         </div>
       </div>
     </div>
