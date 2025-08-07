@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -43,31 +42,44 @@ export default function CuentaCorrienteDetalle() {
 
   return (
     <div className="max-w-3xl mx-auto p-4">
-      <h2 className="text-xl font-bold mb-4 text-center">Detalle de Cuenta Corriente</h2>
+      <h2 className="text-xl font-bold mb-6 text-center">Cuenta Corriente Detallada</h2>
 
       {detalle.length === 0 ? (
         <p className="text-center text-gray-500">No hay movimientos disponibles.</p>
       ) : (
         detalle.map(({ mes, saldo, movimientos }) => (
-          <div key={mes} className="bg-white shadow-md rounded-md p-4 mb-6 border border-gray-200">
-            <div className="flex justify-between items-center mb-2 border-b pb-2">
-              <h3 className="text-lg font-semibold text-gray-700 capitalize">
+          <div
+            key={mes}
+            className="bg-white rounded-lg shadow-lg border border-gray-300 mb-6 p-4"
+          >
+            {/* Encabezado del mes */}
+            <div className="flex justify-between items-center border-b pb-2 mb-2">
+              <h3 className="text-base font-semibold text-gray-800">
                 {new Date(`${mes}-01`).toLocaleDateString("es-AR", {
                   year: "numeric",
                   month: "long",
                 })}
               </h3>
               <span
-                className={`text-sm font-bold ${
-                  saldo > 0 ? "text-green-600" : saldo < 0 ? "text-red-600" : "text-gray-600"
+                className={`text-base font-bold ${
+                  saldo > 0 ? "text-green-600" : saldo < 0 ? "text-red-600" : "text-gray-700"
                 }`}
               >
-                Saldo: {saldo.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                Saldo:{" "}
+                {saldo.toLocaleString("es-AR", {
+                  style: "currency",
+                  currency: "ARS",
+                  minimumFractionDigits: 2,
+                })}
               </span>
             </div>
 
+            {/* Movimientos del mes */}
             {movimientos.map((mov, index) => (
-              <div key={index} className="flex justify-between py-2 border-b last:border-b-0">
+              <div
+                key={index}
+                className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0"
+              >
                 <span className="text-sm text-gray-700">{mov.descripcion}</span>
                 <span
                   className={`text-sm font-medium ${
@@ -75,7 +87,11 @@ export default function CuentaCorrienteDetalle() {
                   }`}
                 >
                   {mov.monto > 0 ? "+" : ""}
-                  {mov.monto.toLocaleString("es-AR", { style: "currency", currency: "ARS" })}
+                  {mov.monto.toLocaleString("es-AR", {
+                    style: "currency",
+                    currency: "ARS",
+                    minimumFractionDigits: 2,
+                  })}
                 </span>
               </div>
             ))}
