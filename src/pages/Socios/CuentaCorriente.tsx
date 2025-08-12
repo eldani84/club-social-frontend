@@ -135,11 +135,11 @@ export default function CuentaCorriente() {
             {bruto !== null && pagado !== null && (
               <div className="text-sm text-gray-600 border-t pt-3">
                 <div className="flex justify-between">
-                  <span>Bruto (cuotas + extras):</span>
+                  <span>A PAGAR:</span>
                   <span>${fmt.format(bruto)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Pagado:</span>
+                  <span>PAGO:</span>
                   <span>− ${fmt.format(pagado)}</span>
                 </div>
               </div>
