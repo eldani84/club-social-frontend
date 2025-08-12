@@ -9,11 +9,23 @@ interface Socio {
   es_titular: boolean;
 }
 
+interface ResumenCC {
+  socio: Socio;
+  movimientos?: any[];
+  total_adeudado?: number; // compat viejo
+  total_bruto?: number;    // suma (cuotas.importe + extras.monto)
+  total_pagado?: number;   // suma (cuotas.monto_pago + extras.pago)
+  total_saldo?: number;    // total_bruto - total_pagado (lo que querés)
+}
 
+const fmt = new Intl.NumberFormat("es-AR", { minimumFractionDigits: 2 });
 
 export default function CuentaCorriente() {
   const [socio, setSocio] = useState<Socio | null>(null);
-  const [totalAdeudado, setTotalAdeudado] = useState<number>(0);
+  const [total, setTotal] = useState<number>(0);
+  const [bruto, setBruto] = useState<number | null>(null);
+  const [pagado, setPagado] = useState<number | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,16 +35,44 @@ export default function CuentaCorriente() {
     const dni = JSON.parse(socioData).dni;
     const API_URL = import.meta.env.VITE_API_URL;
 
-    fetch(`${API_URL}/autogestion/socios/cuenta-corriente/${dni}`)
-      .then((res) => res.json())
-      .then((data) => {
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/autogestion/socios/cuenta-corriente/${dni}`);
+        const data: ResumenCC = await res.json();
+
+        if (!res.ok) throw new Error((data as any)?.error || "Error de servidor");
+
         setSocio(data.socio);
-        setTotalAdeudado(data.total_adeudado);
-      })
-      .catch((err) => {
+
+        // Usamos total_saldo si viene; si no, caemos a total_adeudado (compat viejo)
+        const totalSaldo = (data.total_saldo ?? data.total_adeudado ?? 0) as number;
+        setTotal(Number(totalSaldo) || 0);
+
+        // Guardamos desglose si viene del backend
+        setBruto(
+          typeof data.total_bruto === "number" ? data.total_bruto : null
+        );
+        setPagado(
+          typeof data.total_pagado === "number" ? data.total_pagado : null
+        );
+      } catch (err) {
         console.error("Error al cargar cuenta corriente", err);
-      });
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="p-4 max-w-2xl mx-auto">
+        <h2 className="text-xl font-semibold mb-4 text-center">Cuenta Corriente</h2>
+        <div className="bg-white shadow-sm rounded-lg p-4">
+          <p className="text-sm text-gray-600">Cargando…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 max-w-2xl mx-auto">
@@ -50,10 +90,24 @@ export default function CuentaCorriente() {
           </>
         )}
 
+        {/* Desglose (opcional) si el backend lo envía */}
+        {bruto !== null && pagado !== null && (
+          <div className="text-sm text-gray-600 border-t pt-3">
+            <div className="flex justify-between">
+              <span>Bruto (cuotas + extras):</span>
+              <span>${fmt.format(bruto)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Pagado:</span>
+              <span>− ${fmt.format(pagado)}</span>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between items-center border-t pt-4">
           <span className="text-lg font-semibold">Total a pagar:</span>
           <span className="text-lg font-bold text-red-600">
-            ${totalAdeudado.toLocaleString("es-AR", { minimumFractionDigits: 2 })}
+            ${fmt.format(total)}
           </span>
         </div>
 
@@ -64,13 +118,19 @@ export default function CuentaCorriente() {
           >
             Pago total
           </button>
-            <button
-            onClick={() => navigate(`/socio/cuenta-corriente/detalle/${JSON.parse(localStorage.getItem("socioData") || "{}").dni}`)}
-            
+
+          <button
+            onClick={() =>
+              navigate(
+                `/socio/cuenta-corriente/detalle/${
+                  JSON.parse(localStorage.getItem("socioData") || "{}").dni || ""
+                }`
+              )
+            }
             className="flex-1 border border-red-600 text-red-600 hover:bg-red-100 py-2 px-4 rounded text-sm"
-            >
+          >
             Ver detalle
-            </button>
+          </button>
         </div>
       </div>
     </div>
