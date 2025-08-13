@@ -51,7 +51,7 @@ form {
   box-sizing: border-box;
 }
 
-/* Inputs y selects */
+/* Inputs y selects globales */
 input,
 select,
 textarea {
@@ -122,7 +122,7 @@ button.icon:hover {
   transform: scale(1.12);
 }
 
-/* Tabla moderna */
+/* Tabla moderna (estilos globales) */
 .modern-table {
   width: 100%;
   border-collapse: collapse;
@@ -157,14 +157,13 @@ button.icon:hover {
   background: var(--primary-dark);
 }
 
-/* Barra de filtros */
+/* Barra de filtros (versión básica; la avanzada está más abajo y la sobrescribe) */
 .filtros-bar {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
 }
-
 .filtros-bar input,
 .filtros-bar select {
   padding: 6px 10px;
@@ -176,98 +175,53 @@ button.icon:hover {
   width: auto;
   flex: 0 0 auto;
 }
-
 .filtros-bar input:focus,
 .filtros-bar select:focus {
   border-color: var(--primary);
   outline: none;
 }
 
-
-/* Celdas en edición */
-.input-cell {
-  width: 100%;
-  padding: 5px 6px;
-  font-size: 10pt;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-sizing: border-box;
-}
-.input-cell:focus {
-  border-color: var(--primary);
-  outline: none;
-}
-
-/* Responsive para móviles */
-@media (max-width: 850px) {
-  .main-content {
-    padding-left: 60px;
-    padding-right: 12px;
-  }
-
-  .modern-table th,
-  .modern-table td {
-    font-size: 9pt;
-  }
-
-  .form-modern,
-  form {
-    padding: 12px 14px;
-  }
-}
-/* Botones de acción dentro de la tabla */
+/* Botones de acción dentro de la tabla (única definición, sin duplicados) */
 .btn-icon {
   background: transparent;
   border: none;
   padding: 2px 4px;
-  font-size: 14px;          /* 👈 Podés ajustar aún más si querés */
+  font-size: 14px;
   cursor: pointer;
-  color: #444;              /* Color base neutro */
+  color: #444;
   transition: color 0.2s ease;
 }
+.btn-icon:hover { color: #b91c1c; }
+.btn-icon:focus { outline: none; }
 
-.btn-icon:hover {
-  color: #b91c1c;           /* Rojo institucional al pasar el mouse */
-}
-
-.btn-icon:focus {
-  outline: none;
-}
 /* Layout base */
 .app-layout {
   display: flex;
   min-height: 100vh;
 }
-
 .sidebar {
   width: 220px;
   transition: width 0.3s ease;
 }
-
 .main-content {
   flex-grow: 1;
   padding: 16px;
   margin-left: 220px;
   transition: margin-left 0.3s ease;
 }
+.sidebar.collapsed { width: 60px; }
+.sidebar.collapsed + .main-content { margin-left: 60px; }
 
-/* Si más adelante querés usar un sidebar colapsable */
-.sidebar.collapsed {
-  width: 60px;
-}
-
-.sidebar.collapsed + .main-content {
-  margin-left: 60px;
-}
 .input-modern {
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 4px 8px;
-  font-size: 0.75rem;  /* Letra más chica */
+  font-size: 0.75rem;
   height: 32px;
   width: 100%;
   box-sizing: border-box;
 }
+
 .gestion-container {
   max-width: 1200px;
   margin: 2rem auto;
@@ -276,7 +230,6 @@ button.icon:hover {
   box-shadow: 0 4px 32px 0 rgba(200,0,0,0.09);
   padding: 2.2rem 1.5rem 1.5rem 1.5rem;
 }
-
 .form-section-title {
   font-size: 1.1rem;
   color: #d32f2f;
@@ -286,41 +239,40 @@ button.icon:hover {
   text-align: left;
 }
 
+/* Barra de filtros (versión mejorada) */
 .filtros-bar {
   display: flex;
   flex-wrap: wrap;
   gap: 1.1rem;
   margin-bottom: 1.2rem;
-  max-width: 900px;         /* 👈 Nuevo: limita el ancho total de la barra */
-  margin-left: auto;        /* 👈 Centra horizontalmente */
+  max-width: 900px;
+  margin-left: auto;
   margin-right: auto;
 }
-
 .filtros-bar input,
 .filtros-bar select {
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
   border: 1px solid #ececec;
   background: #f8f8f8;
-  min-width: 140px;         /* 👈 Nuevo: ancho mínimo más compacto */
+  min-width: 140px;
   font-size: 0.95rem;
-  flex: 0 0 auto;           /* 👈 No se estiran */
+  flex: 0 0 auto;
   width: auto;
 }
-
 .filtros-bar input:focus,
 .filtros-bar select:focus {
   outline: 2px solid #d32f2f66;
   background: #fff;
 }
 
+/* Tabla moderna avanzada */
 .tabla-moderna-wrapper {
   overflow-x: auto;
   border-radius: 10px;
   box-shadow: 0 2px 10px 0 rgba(220,0,0,0.07);
   background: #fafbfc;
 }
-
 .tabla-moderna {
   min-width: 1200px;
   width: 100%;
@@ -328,7 +280,6 @@ button.icon:hover {
   font-size: 0.98rem;
   background: transparent;
 }
-
 .tabla-moderna th,
 .tabla-moderna td {
   padding: 10px 12px;
@@ -336,7 +287,6 @@ button.icon:hover {
   border-bottom: 1.5px solid #f1f1f1;
   white-space: nowrap;
 }
-
 .tabla-moderna th {
   background: #e53935;
   color: #fff;
@@ -347,18 +297,9 @@ button.icon:hover {
   user-select: none;
   transition: background 0.2s;
 }
-
-.tabla-moderna th:hover {
-  background: #b71c1c;
-}
-
-.tabla-moderna tr:nth-child(even) td {
-  background: #fff5f5;
-}
-
-.tabla-moderna tr:hover td {
-  background: #ffebee;
-}
+.tabla-moderna th:hover { background: #b71c1c; }
+.tabla-moderna tr:nth-child(even) td { background: #fff5f5; }
+.tabla-moderna tr:hover td { background: #ffebee; }
 
 @media (max-width: 800px) {
   .tabla-moderna th,
@@ -366,35 +307,15 @@ button.icon:hover {
     padding: 8px 5px;
     font-size: 0.91rem;
   }
-
-  .filtros-bar {
-    gap: 0.5rem;
-  }
-
+  .filtros-bar { gap: 0.5rem; }
   .filtros-bar input,
   .filtros-bar select {
     min-width: 100px;
     font-size: 0.85rem;
   }
 }
-/* Botones de acción dentro de la tabla */
-.btn-icon {
-  background: transparent;
-  border: none;
-  padding: 2px 4px;
-  font-size: 14px;          /* 👈 Podés ajustar aún más si querés */
-  cursor: pointer;
-  color: #444;              /* Color base neutro */
-  transition: color 0.2s ease;
-}
 
-.btn-icon:hover {
-  color: #b91c1c;           /* Rojo institucional al pasar el mouse */
-}
-
-.btn-icon:focus {
-  outline: none;
-}
+/* Topbar */
 .topbar-container {
   display: flex;
   justify-content: space-between;
@@ -404,11 +325,7 @@ button.icon:hover {
   padding: 8px 16px;
   font-size: 12px;
 }
-
-.usuario-nombre {
-  font-weight: 400;
-}
-
+.usuario-nombre { font-weight: 400; }
 .btn-cerrar-sesion {
   background-color: white;
   color: #b91c1c;
@@ -418,11 +335,9 @@ button.icon:hover {
   border-radius: 4px;
   cursor: pointer;
 }
+.btn-cerrar-sesion:hover { background-color: #f8d7da; }
 
-.btn-cerrar-sesion:hover {
-  background-color: #f8d7da;
-}
-/* Asegura visibilidad del video */
+/* Video/canvas utilidades */
 video {
   display: block;
   border: 2px solid #ccc;
@@ -430,53 +345,48 @@ video {
   background-color: black;
   max-width: 100%;
 }
+canvas { display: none; }
+button { display: inline-block; }
 
-/* Asegura visibilidad del canvas (aunque lo tengas oculto) */
-canvas {
-  display: none;
-}
+/* ========================= */
+/*  ESPECÍFICO: Gestionar Socios  */
+/* ========================= */
 
-/* Asegura que los botones no se colapsen ni se oculten */
-button {
-  display: inline-block;
-}
-.perfil-socio-app {
-  padding: 1rem;
-  max-width: 500px;
-  margin: 0 auto;
-  text-align: center;
+/* Solo aplica a la pantalla de Gestionar Socios */
+.gestionar-socios .modern-table {
+  table-layout: auto; /* permite que las celdas se adapten */
 }
 
-.perfil-socio-app .titulo {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  font-weight: bold;
+/* Inputs compactos en la tabla por defecto (solo en Gestionar Socios) */
+.gestionar-socios .input-cell {
+  width: 140px;           /* compacto por defecto */
+  padding: 5px 6px;
+  font-size: 10pt;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  transition: width .15s ease;
+}
+.gestionar-socios .input-cell:focus {
+  border-color: var(--primary);
+  outline: none;
 }
 
-.info-basica {
-  font-size: 0.9rem;
-  margin-bottom: 1.5rem;
-  text-align: left;
+/* Al EDITAR: inputs de la fila se expanden a 100% */
+.gestionar-socios .row-editing .input-cell {
+  width: 100%;
+  min-width: 240px;       /* agrandado al editar; podés subir si querés */
 }
 
-.grid-opciones {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
+/* Resaltado visual de la fila en edición */
+.gestionar-socios .row-editing td {
+  background: #fff8f8;               /* leve rosa */
+  transition: background .2s ease;
+}
+/* Evita que el hover tape el color de edición */
+.gestionar-socios .modern-table tbody tr.row-editing:hover td {
+  background: #fff3f3;
 }
 
-.btn-opcion {
-  background-color: var(--primary, #c8102e);
-  color: white;
-  padding: 1rem;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  text-decoration: none;
-  font-weight: 500;
-  display: block;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
-
-.btn-opcion:hover {
-  background-color: #a00;
-}
+/* Útil si no usás Tailwind dentro de esta pantalla */
+.gestionar-socios .w-full { width: 100%; }
