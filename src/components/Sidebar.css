@@ -104,6 +104,24 @@
   transform: rotate(180deg);
 }
 
+/* 🔥 NUEVO: contenedor scrolleable */
+.sidebar-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 6px; /* deja espacio para el scrollbar */
+}
+
+/* Scrollbar sutil en Chromium */
+.sidebar-scroll::-webkit-scrollbar { width: 8px; }
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.25);
+  border-radius: 6px;
+}
+.sidebar-scroll:hover::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.4);
+}
+
 /* Si está colapsado */
 .sidebar.collapsed {
   width: 60px;

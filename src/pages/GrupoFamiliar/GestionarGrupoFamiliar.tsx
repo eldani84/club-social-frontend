@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-
+// C:\Users\Daniel\Documents\VCC CURSO\club-social-frontend\src\pages\GrupoFamiliar\GestionarGrupoFamiliar.tsx
+import { useEffect, useRef, useState } from "react";
 type Socio = {
   id: number;
   nombre: string;
@@ -25,7 +25,7 @@ type Grupo = {
 };
 
 export default function GestionarGrupoFamiliar() {
-  const [socios, setSocios] = useState<Socio[]>([]);
+  const [socios, setSocios] = useState<Socio[]>([]); // catálogo base para conocer grupo_familiar_id
   const [busqueda, setBusqueda] = useState("");
   const [socioSeleccionado, setSocioSeleccionado] = useState<Socio | null>(null);
   const [grupo, setGrupo] = useState<Grupo | null>(null);
@@ -35,15 +35,25 @@ export default function GestionarGrupoFamiliar() {
   const [resultadosAgregar, setResultadosAgregar] = useState<Socio[]>([]);
   const [resultados, setResultados] = useState<Socio[]>([]);
 
-  const API = import.meta.env.VITE_API_URL;
+  const [loadingBuscar, setLoadingBuscar] = useState(false);
+  const [loadingAgregar, setLoadingAgregar] = useState(false);
+  const [errBuscar, setErrBuscar] = useState<string | null>(null);
+  const [errAgregar, setErrAgregar] = useState<string | null>(null);
 
+  const API = import.meta.env.VITE_API_URL;
+  const acBuscarRef = useRef<AbortController | null>(null);
+  const acAgregarRef = useRef<AbortController | null>(null);
+
+  // Carga catálogo base (para saber grupo_familiar_id y poder mostrar "(En grupo)")
   useEffect(() => {
     fetch(`${API}/socios`)
       .then(res => res.json())
       .then(setSocios)
       .catch(() => setMensaje("Error al cargar la lista de socios."));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Al elegir socio, cargar su grupo (si tiene)
   useEffect(() => {
     if (!socioSeleccionado || !socioSeleccionado.grupo_familiar_id) {
       setGrupo(null);
@@ -53,41 +63,81 @@ export default function GestionarGrupoFamiliar() {
       .then(res => res.json())
       .then(setGrupo)
       .catch(() => setMensaje("Error al cargar el grupo familiar."));
-  }, [socioSeleccionado]);
+  }, [socioSeleccionado, API]);
 
+  // Helper: enriquece con grupo_familiar_id usando el catálogo local
+  const enrichWithGrupo = (rows: Array<Pick<Socio, "id" | "nombre" | "apellido" | "dni">>): Socio[] => {
+    const map = new Map(socios.map(s => [s.id, s.grupo_familiar_id]));
+    return rows.map(r => ({
+      ...r,
+      grupo_familiar_id: map.get(r.id) ?? null,
+    }));
+  };
+
+  // Autocomplete principal (elegir socio): busca en backend tokenizado
   useEffect(() => {
-    const valor = busqueda.trim().toLowerCase();
-    if (valor.length < 2) {
+    const q = busqueda.trim();
+    setErrBuscar(null);
+    if (q.length < 2) {
       setResultados([]);
+      if (acBuscarRef.current) acBuscarRef.current.abort();
       return;
     }
-    setResultados(
-      socios.filter(s =>
-        s.nombre.toLowerCase().includes(valor) ||
-        s.apellido.toLowerCase().includes(valor) ||
-        s.dni.toLowerCase().includes(valor) ||
-        (`${s.nombre} ${s.apellido}`).toLowerCase().includes(valor)
-      )
-    );
-  }, [busqueda, socios]);
+    const t = setTimeout(() => {
+      if (acBuscarRef.current) acBuscarRef.current.abort();
+      const ac = new AbortController();
+      acBuscarRef.current = ac;
+      setLoadingBuscar(true);
+      fetch(`${API}/socios/buscar?busqueda=${encodeURIComponent(q)}`, { signal: ac.signal })
+        .then(async r => {
+          if (!r.ok) throw new Error(await r.text().catch(() => "Error"));
+          return r.json();
+        })
+        .then((rows: Array<Pick<Socio, "id" | "nombre" | "apellido" | "dni">>) => {
+          setResultados(enrichWithGrupo(rows));
+        })
+        .catch(e => {
+          if (e.name !== "AbortError") setErrBuscar("Error buscando socios");
+        })
+        .finally(() => setLoadingBuscar(false));
+    }, 300);
+    return () => clearTimeout(t);
+  }, [busqueda, API, socios]);
 
+  // Autocomplete "Agregar integrante": busca en backend y filtra fuera los que ya están en grupo o ya son integrantes
   useEffect(() => {
-    const valor = nuevoSocioBusqueda.trim().toLowerCase();
-    if (!grupo || valor.length < 2) {
+    const q = nuevoSocioBusqueda.trim();
+    setErrAgregar(null);
+    if (!grupo || q.length < 2) {
       setResultadosAgregar([]);
+      if (acAgregarRef.current) acAgregarRef.current.abort();
       return;
     }
-    setResultadosAgregar(
-      socios.filter(s =>
-        !s.grupo_familiar_id && (
-          s.nombre.toLowerCase().includes(valor) ||
-          s.apellido.toLowerCase().includes(valor) ||
-          s.dni.toLowerCase().includes(valor) ||
-          (`${s.nombre} ${s.apellido}`).toLowerCase().includes(valor)
-        )
-      )
-    );
-  }, [nuevoSocioBusqueda, socios, grupo]);
+    const integrantesIds = new Set(grupo.integrantes.map(i => i.id));
+    const t = setTimeout(() => {
+      if (acAgregarRef.current) acAgregarRef.current.abort();
+      const ac = new AbortController();
+      acAgregarRef.current = ac;
+      setLoadingAgregar(true);
+      fetch(`${API}/socios/buscar?busqueda=${encodeURIComponent(q)}`, { signal: ac.signal })
+        .then(async r => {
+          if (!r.ok) throw new Error(await r.text().catch(() => "Error"));
+          return r.json();
+        })
+        .then((rows: Array<Pick<Socio, "id" | "nombre" | "apellido" | "dni">>) => {
+          const withGrupo = enrichWithGrupo(rows);
+          // igual que antes: solo mostrar los que NO tienen grupo y no están ya en este grupo
+          setResultadosAgregar(
+            withGrupo.filter(s => !s.grupo_familiar_id && !integrantesIds.has(s.id))
+          );
+        })
+        .catch(e => {
+          if (e.name !== "AbortError") setErrAgregar("Error buscando socios");
+        })
+        .finally(() => setLoadingAgregar(false));
+    }, 300);
+    return () => clearTimeout(t);
+  }, [nuevoSocioBusqueda, API, grupo, socios]);
 
   const handleElegirSocio = (socio: Socio) => {
     setSocioSeleccionado(socio);
@@ -142,9 +192,8 @@ export default function GestionarGrupoFamiliar() {
       setMensaje("Grupo eliminado con éxito.");
       setGrupo(null);
       setSocioSeleccionado(null);
-      fetch(`${API}/socios`)
-        .then(res => res.json())
-        .then(setSocios);
+      // refresco catálogo base
+      fetch(`${API}/socios`).then(res => res.json()).then(setSocios);
     } else {
       setMensaje(data.error || "Error eliminando el grupo.");
     }
@@ -155,9 +204,8 @@ export default function GestionarGrupoFamiliar() {
     fetch(`${API}/grupos/por-socio/${socioSeleccionado.id}`)
       .then(res => res.json())
       .then(setGrupo);
-    fetch(`${API}/socios`)
-      .then(res => res.json())
-      .then(setSocios);
+    // refresco catálogo base (por si cambió grupo_familiar_id de alguien)
+    fetch(`${API}/socios`).then(res => res.json()).then(setSocios);
   };
 
   return (
@@ -168,20 +216,20 @@ export default function GestionarGrupoFamiliar() {
         Buscar socio (DNI, nombre o apellido):
         <input
           type="text"
-          placeholder="Buscar..."
+          placeholder='Ej: "eberhardt d"'
           value={busqueda}
           onChange={e => setBusqueda(e.target.value)}
           autoComplete="off"
           style={{ width: 260, marginBottom: 8 }}
         />
-        {resultados.length > 0 && (
+        {(loadingBuscar || errBuscar || resultados.length > 0 || busqueda.trim().length >= 2) && (
           <ul style={{
             border: "1.5px solid #b91c1c88",
             position: "absolute",
             zIndex: 30,
             background: "#fff",
-            width: 320,
-            maxHeight: 150,
+            width: 340,
+            maxHeight: 180,
             overflowY: "auto",
             paddingLeft: 0,
             marginTop: 2,
@@ -189,7 +237,14 @@ export default function GestionarGrupoFamiliar() {
             listStyle: "none",
             boxShadow: "0 4px 12px #b91c1c15"
           }}>
-            {resultados.map(s => (
+            {loadingBuscar && <li style={{ padding: "6px 12px" }}>Buscando…</li>}
+            {!loadingBuscar && errBuscar && (
+              <li style={{ padding: "6px 12px", color: "#b91c1c" }}>{errBuscar}</li>
+            )}
+            {!loadingBuscar && !errBuscar && resultados.length === 0 && busqueda.trim().length >= 2 && (
+              <li style={{ padding: "6px 12px", opacity: 0.7 }}>Sin resultados</li>
+            )}
+            {!loadingBuscar && !errBuscar && resultados.map(s => (
               <li
                 key={s.id}
                 style={{
@@ -201,7 +256,7 @@ export default function GestionarGrupoFamiliar() {
                 onClick={() => handleElegirSocio(s)}
                 onMouseDown={e => e.preventDefault()}
               >
-                <b>{s.nombre} {s.apellido}</b> — DNI: {s.dni}
+                <b>{s.apellido} {s.nombre}</b> — DNI: {s.dni}
                 {s.grupo_familiar_id && (
                   <span style={{ color: "#1976d2", marginLeft: 8 }}>(En grupo)</span>
                 )}
@@ -210,21 +265,27 @@ export default function GestionarGrupoFamiliar() {
           </ul>
         )}
       </label>
-      {mensaje && <div style={{ color: mensaje.startsWith("Grupo eliminado") ? "#008000" : "#b91c1c", margin: "10px 0" }}>{mensaje}</div>}
+
+      {mensaje && (
+        <div style={{ color: mensaje.startsWith("Grupo eliminado") ? "#008000" : "#b91c1c", margin: "10px 0" }}>
+          {mensaje}
+        </div>
+      )}
 
       {socioSeleccionado && (
         <div style={{ marginBottom: 14, fontWeight: 600 }}>
-          Socio: {socioSeleccionado.nombre} {socioSeleccionado.apellido} — DNI: {socioSeleccionado.dni}
+          Socio: {socioSeleccionado.apellido} {socioSeleccionado.nombre} — DNI: {socioSeleccionado.dni}
         </div>
       )}
       {socioSeleccionado && !socioSeleccionado.grupo_familiar_id && (
         <div style={{ color: "#1976d2", marginBottom: 8 }}>NO PERTENECE A NINGÚN GRUPO FAMILIAR</div>
       )}
+
       {grupo && (
         <div style={{ marginTop: 10 }}>
           <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between" }}>
             <span>
-              <b>Grupo #{grupo.grupo_id}</b> — Titular: {grupo.titular_nombre} {grupo.titular_apellido}
+              <b>Grupo #{grupo.grupo_id}</b> — Titular: {grupo.titular_apellido} {grupo.titular_nombre}
             </span>
             <button
               style={{
@@ -241,11 +302,12 @@ export default function GestionarGrupoFamiliar() {
               Eliminar grupo
             </button>
           </div>
+
           <table className="modern-table">
             <thead>
               <tr>
-                <th>Nombre</th>
                 <th>Apellido</th>
+                <th>Nombre</th>
                 <th>DNI</th>
                 <th>¿Titular?</th>
                 <th>Acciones</th>
@@ -254,8 +316,8 @@ export default function GestionarGrupoFamiliar() {
             <tbody>
               {grupo.integrantes.map(integ => (
                 <tr key={integ.id}>
-                  <td>{integ.nombre}</td>
                   <td>{integ.apellido}</td>
+                  <td>{integ.nombre}</td>
                   <td>{integ.dni}</td>
                   <td style={{ textAlign: "center" }}>{integ.es_titular ? "✅" : ""}</td>
                   <td>
@@ -286,21 +348,21 @@ export default function GestionarGrupoFamiliar() {
               Agregar integrante:
               <input
                 type="text"
-                placeholder="Buscar socio (DNI, nombre o apellido)"
+                placeholder='Buscar socio (DNI, nombre o apellido)'
                 value={nuevoSocioBusqueda}
                 onChange={e => setNuevoSocioBusqueda(e.target.value)}
                 style={{ marginRight: 6, width: 270 }}
                 autoComplete="off"
               />
             </label>
-            {resultadosAgregar.length > 0 && (
+            {(loadingAgregar || errAgregar || resultadosAgregar.length > 0 || nuevoSocioBusqueda.trim().length >= 2) && (
               <ul style={{
                 border: "1.5px solid #b91c1c88",
                 position: "absolute",
                 zIndex: 31,
                 background: "#fff",
-                width: 320,
-                maxHeight: 150,
+                width: 340,
+                maxHeight: 180,
                 overflowY: "auto",
                 paddingLeft: 0,
                 marginTop: 2,
@@ -308,7 +370,14 @@ export default function GestionarGrupoFamiliar() {
                 listStyle: "none",
                 boxShadow: "0 4px 12px #b91c1c15"
               }}>
-                {resultadosAgregar.map(s => (
+                {loadingAgregar && <li style={{ padding: "6px 12px" }}>Buscando…</li>}
+                {!loadingAgregar && errAgregar && (
+                  <li style={{ padding: "6px 12px", color: "#b91c1c" }}>{errAgregar}</li>
+                )}
+                {!loadingAgregar && !errAgregar && resultadosAgregar.length === 0 && nuevoSocioBusqueda.trim().length >= 2 && (
+                  <li style={{ padding: "6px 12px", opacity: 0.7 }}>Sin resultados</li>
+                )}
+                {!loadingAgregar && !errAgregar && resultadosAgregar.map(s => (
                   <li
                     key={s.id}
                     style={{
@@ -320,7 +389,7 @@ export default function GestionarGrupoFamiliar() {
                     onClick={() => agregarIntegrante(s)}
                     onMouseDown={e => e.preventDefault()}
                   >
-                    <b>{s.nombre} {s.apellido}</b> — DNI: {s.dni}
+                    <b>{s.apellido} {s.nombre}</b> — DNI: {s.dni}
                   </li>
                 ))}
               </ul>

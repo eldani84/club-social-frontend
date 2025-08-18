@@ -1,5 +1,5 @@
 // src/pages/Socios/GestionarSocios.tsx
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { utils, writeFile } from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -33,26 +33,36 @@ interface Socio {
   email_recuperacion: string | null;
 }
 
-interface Categoria {
-  id: number;
-  nombre: string;
-}
+interface Categoria { id: number; nombre: string; }
+interface FormaPago { id: number; forma_de_pago: string; }
 
-interface FormaPago {
-  id: number;
-  forma_de_pago: string;
-}
+type PaginadoResp = {
+  rows: Socio[];
+  page: number;
+  pageSize: number;
+  total: number;
+  hasMore: boolean;
+};
 
 export default function GestionarSocios() {
   const [socios, setSocios] = useState<Socio[]>([]);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(50);
+  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [form, setForm] = useState<Partial<Socio>>({});
+
+  // Filtros UI
   const [busqueda, setBusqueda] = useState("");
   const [filtroMesNacimiento, setFiltroMesNacimiento] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState("");
   const [filtroTitular, setFiltroTitular] = useState("");
   const [filtroFormaPago, setFiltroFormaPago] = useState("");
+
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [formasPago, setFormasPago] = useState<FormaPago[]>([]);
 
@@ -85,12 +95,65 @@ export default function GestionarSocios() {
     return `${d.getFullYear()}-${mm}-${dd}`;
   };
 
-  // Carga inicial
+  // Carga combos
   useEffect(() => {
-    fetch(`${API}/socios`).then((res) => res.json()).then(setSocios);
     fetch(`${API}/categorias`).then((res) => res.json()).then(setCategorias);
     fetch(`${API}/formas_pago`).then((res) => res.json()).then(setFormasPago);
-  }, []);
+  }, [API]);
+
+  // Armado de query server-side con filtros y paginación
+  const queryString = useMemo(() => {
+    const p = new URLSearchParams();
+    p.set("page", String(page));
+    p.set("pageSize", String(pageSize));
+
+    if (busqueda.trim()) p.set("search", busqueda.trim());
+    if (filtroMesNacimiento.trim()) p.set("mes_nac", filtroMesNacimiento.trim()); // 01..12
+    if (filtroEstado) p.set("estado", filtroEstado);
+    if (filtroCategoria) p.set("categoria_id", filtroCategoria);
+    if (filtroTitular) p.set("titular", filtroTitular); // "true"/"false"
+    if (filtroFormaPago) p.set("forma_pago_id", filtroFormaPago);
+
+    // Orden por defecto: Apellido, Nombre
+    p.set("orderBy", "apellido");
+    p.set("orderDir", "asc");
+
+    return p.toString();
+  }, [
+    page,
+    pageSize,
+    busqueda,
+    filtroMesNacimiento,
+    filtroEstado,
+    filtroCategoria,
+    filtroTitular,
+    filtroFormaPago,
+  ]);
+
+  // Cargar página (append si page>1)
+  useEffect(() => {
+    let cancel = false;
+    setLoading(true);
+    fetch(`${API}/socios/paginar?${queryString}`)
+      .then((r) => r.json())
+      .then((json: PaginadoResp) => {
+        if (cancel) return;
+        if (page === 1) setSocios(json.rows);
+        else setSocios((prev) => [...prev, ...json.rows]);
+        setTotal(json.total);
+        setHasMore(json.hasMore);
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancel) setLoading(false); });
+    return () => { cancel = true; };
+  }, [API, queryString, page]);
+
+  // Cambio de filtros => reinicia a página 1
+  function aplicarFiltros() {
+    setEditandoId(null);
+    setForm({});
+    setPage(1);
+  }
 
   // Change control
   const handleChange = (
@@ -172,7 +235,7 @@ export default function GestionarSocios() {
       nro_carnet: (form.nro_carnet ?? original.nro_carnet ?? "") as string,
 
       fecha_nacimiento: (normFecha(form.fecha_nacimiento ?? original.fecha_nacimiento) || null) as any,
-      fecha_alta: nuevaFechaAlta as any,
+      fecha_alta: (nuevaFechaAlta as any),
       estado: estadoValido,
 
       clave: (form.clave ?? original.clave ?? "") as string,
@@ -197,8 +260,8 @@ export default function GestionarSocios() {
       alert("Socio actualizado correctamente");
       setEditandoId(null);
       setForm({});
-      const nuevos = await fetch(`${API}/socios`).then((r) => r.json());
-      setSocios(nuevos);
+      // Refrescar página 1 con los filtros vigentes
+      setPage(1);
     } catch (err: any) {
       alert("Error al actualizar socio: " + (err?.message || err));
     }
@@ -215,51 +278,16 @@ export default function GestionarSocios() {
       const res = await fetch(`${API}/socios/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Error al eliminar socio");
       alert("Socio eliminado correctamente");
-      const nuevos = await fetch(`${API}/socios`).then((r) => r.json());
-      setSocios(nuevos);
+      // Refrescar desde página 1 con filtros
+      setPage(1);
     } catch (err) {
       alert("Error eliminando socio: " + err);
     }
   };
 
-  // ---- Búsqueda mejorada por tokens (apellido+nombre y DNI) ----
-  const normalizeText = (text: string) =>
-    text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-  const tokensFrom = (text: string) =>
-    normalizeText(text).split(/\s+/).filter(Boolean);
-
-  const anyWordStartsWith = (haystack: string, needle: string) => {
-    const hayTokens = tokensFrom(haystack);
-    const needleTokens = tokensFrom(needle);
-    return needleTokens.every((nt) => hayTokens.some((ht) => ht.startsWith(nt)));
-  };
-
-  const sociosFiltrados = socios.filter((s) => {
-    const cumpleMes = filtroMesNacimiento
-      ? s.fecha_nacimiento?.slice(5, 7) === filtroMesNacimiento
-      : true;
-
-    const nombreCompletoApNom = `${s.apellido ?? ""} ${s.nombre ?? ""}`;
-    const nombreCompletoNomAp = `${s.nombre ?? ""} ${s.apellido ?? ""}`;
-    const matchNombreApellido =
-      anyWordStartsWith(nombreCompletoApNom, busqueda) ||
-      anyWordStartsWith(nombreCompletoNomAp, busqueda);
-    const matchDni = (s.dni || "").includes(busqueda);
-
-    return (
-      (matchNombreApellido || matchDni) &&
-      cumpleMes &&
-      (filtroEstado ? s.estado === filtroEstado : true) &&
-      (filtroCategoria ? String(s.categoria_id ?? "") === filtroCategoria : true) &&
-      (filtroFormaPago ? String(s.forma_pago_id ?? "") === filtroFormaPago : true) &&
-      (filtroTitular ? String(!!s.es_titular) === filtroTitular : true)
-    );
-  });
-
-  // Exportaciones
+  // Exportar lo visible (filtrado/paginado actual)
   const exportarExcel = () => {
-    const data = sociosFiltrados.map((s) => ({
+    const data = socios.map((s) => ({
       "N° Socio": s.id,
       "Apellido Nombre": `${s.apellido} ${s.nombre}`,
       DNI: s.dni || "",
@@ -282,7 +310,7 @@ export default function GestionarSocios() {
     const columns = [
       "N° Socio","Apellido Nombre","DNI","Email","Instagram","Teléfono","Fecha Nacimiento","Estado","Forma de Cobro"
     ];
-    const rows = sociosFiltrados.map((s) => [
+    const rows = socios.map((s) => [
       s.id,
       `${s.apellido} ${s.nombre}`,
       s.dni || "",
@@ -374,10 +402,18 @@ export default function GestionarSocios() {
             ))}
           </select>
         </label>
+
         <div className="flex gap-2">
+          <button onClick={aplicarFiltros} className="btn-icon text-sm" title="Aplicar filtros">🔎 Aplicar</button>
           <button onClick={exportarExcel} className="btn-icon text-sm" title="Exportar Excel">📤 Excel</button>
           <button onClick={exportarPDF} className="btn-icon text-sm" title="Exportar PDF">📄 PDF</button>
         </div>
+      </div>
+
+      {/* RESUMEN */}
+      <div className="flex gap-4 bg-white p-3 rounded-xl shadow-sm text-xs mb-2">
+        <div><strong>Total filtrado:</strong> {total}</div>
+        <div><strong>Cargados en pantalla:</strong> {socios.length}</div>
       </div>
 
       {/* TABLA */}
@@ -411,7 +447,7 @@ export default function GestionarSocios() {
           </tr>
         </thead>
         <tbody>
-          {sociosFiltrados.map((s) => {
+          {socios.map((s) => {
             const editando = editandoId === s.id;
             return (
               <tr
@@ -531,6 +567,18 @@ export default function GestionarSocios() {
           })}
         </tbody>
       </table>
+
+      {/* Paginación */}
+      <div className="flex gap-8 items-center mt-3 text-sm">
+        <div>Mostrando {socios.length} de {total}</div>
+        {hasMore ? (
+          <button disabled={loading} onClick={() => setPage(p => p + 1)} className="btn">
+            {loading ? "Cargando..." : "Cargar más"}
+          </button>
+        ) : (
+          <span className="opacity-70">No hay más resultados</span>
+        )}
+      </div>
     </div>
   );
 }

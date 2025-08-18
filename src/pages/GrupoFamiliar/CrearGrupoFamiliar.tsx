@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// C:\Users\Daniel\Documents\VCC CURSO\club-social-frontend\src\pages\GrupoFamiliar\CrearGrupoFamiliar.tsx
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 type Socio = {
   id: number;
@@ -9,49 +10,65 @@ type Socio = {
 };
 
 export default function CrearGrupoFamiliar() {
-  const [socios, setSocios] = useState<Socio[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [resultados, setResultados] = useState<Socio[]>([]);
+  const [loading, setLoading] = useState(false);
   const [seleccionados, setSeleccionados] = useState<Socio[]>([]);
   const [idTitular, setIdTitular] = useState<number | null>(null);
   const [mensaje, setMensaje] = useState<string | null>(null);
+  const [errorBusq, setErrorBusq] = useState<string | null>(null);
 
   const API = import.meta.env.VITE_API_URL;
+  const acRef = useRef<AbortController | null>(null);
 
+  // Autocomplete: consulta al backend (tokenizado apellido nombre dni)
   useEffect(() => {
-    fetch(`${API}/socios`)
-      .then((res) => res.json())
-      .then(setSocios)
-      .catch(() => setMensaje("Error al obtener socios."));
-  }, []);
+    const q = busqueda.trim();
+    setErrorBusq(null);
 
-  useEffect(() => {
-    const valor = busqueda.trim().toLowerCase();
-    if (valor.length < 2) {
+    // limpiar resultados si menos de 2 caracteres
+    if (q.length < 2) {
       setResultados([]);
+      if (acRef.current) acRef.current.abort();
       return;
     }
-    setResultados(
-      socios
-        .filter(
-          (s) =>
-            s.nombre.toLowerCase().includes(valor) ||
-            s.apellido.toLowerCase().includes(valor) ||
-            s.dni.toLowerCase().includes(valor) ||
-            (`${s.nombre} ${s.apellido}`).toLowerCase().includes(valor)
-        )
-        .filter((s) => !seleccionados.some((sel) => sel.id === s.id))
-    );
-  }, [busqueda, socios, seleccionados]);
+
+    // debounce 300ms
+    const t = setTimeout(() => {
+      if (acRef.current) acRef.current.abort();
+      const ac = new AbortController();
+      acRef.current = ac;
+      setLoading(true);
+
+      fetch(`${API}/socios/buscar?busqueda=${encodeURIComponent(q)}`, {
+        signal: ac.signal,
+      })
+        .then(async (r) => {
+          if (!r.ok) throw new Error(await r.text().catch(() => "Error"));
+          return r.json();
+        })
+        .then((rows: Socio[]) => {
+          // filtrar los que ya están seleccionados
+          const yaIds = new Set(seleccionados.map((s) => s.id));
+          setResultados(rows.filter((r) => !yaIds.has(r.id)));
+        })
+        .catch((e) => {
+          if (e.name !== "AbortError") setErrorBusq("Error buscando socios");
+        })
+        .finally(() => setLoading(false));
+    }, 300);
+
+    return () => clearTimeout(t);
+  }, [busqueda, API, seleccionados]);
 
   const agregarSocio = (socio: Socio) => {
-    setSeleccionados([...seleccionados, socio]);
+    setSeleccionados((prev) => [...prev, socio]);
     setBusqueda("");
     setResultados([]);
   };
 
   const quitarSocio = (id: number) => {
-    setSeleccionados(seleccionados.filter((s) => s.id !== id));
+    setSeleccionados((prev) => prev.filter((s) => s.id !== id));
     if (idTitular === id) setIdTitular(null);
   };
 
@@ -76,12 +93,12 @@ export default function CrearGrupoFamiliar() {
         }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data?.success) {
         setMensaje("¡Grupo familiar creado exitosamente!");
         setSeleccionados([]);
         setIdTitular(null);
       } else {
-        setMensaje(data.error || "Error al crear el grupo.");
+        setMensaje(data?.error || "Error al crear el grupo.");
       }
     } catch {
       setMensaje("Error de red al crear grupo.");
@@ -96,44 +113,58 @@ export default function CrearGrupoFamiliar() {
       <div style={{ position: "relative", marginBottom: 16 }}>
         <input
           type="text"
-          placeholder="Buscar..."
+          placeholder='Ej: "eberhardt d"'
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
           autoComplete="off"
-          style={{ width: 260 }}
+          style={{ width: 320 }}
         />
-        {resultados.length > 0 && (
+        {(loading || resultados.length > 0 || errorBusq || busqueda.trim().length >= 2) && (
           <ul
             style={{
               border: "1.5px solid #b91c1c88",
               position: "absolute",
               zIndex: 30,
               background: "#fff",
-              width: 320,
-              maxHeight: 150,
+              width: 360,
+              maxHeight: 220,
               overflowY: "auto",
               paddingLeft: 0,
               marginTop: 2,
               borderRadius: 8,
               listStyle: "none",
-              boxShadow: "0 4px 12px #b91c1c15"
+              boxShadow: "0 4px 12px #b91c1c15",
             }}
           >
-            {resultados.map((s) => (
-              <li
-                key={s.id}
-                style={{
-                  cursor: "pointer",
-                  padding: "6px 12px",
-                  borderBottom: "1px solid #eee",
-                  borderRadius: 6
-                }}
-                onClick={() => agregarSocio(s)}
-                onMouseDown={(e) => e.preventDefault()}
-              >
-                <b>{s.nombre} {s.apellido}</b> — DNI: {s.dni}
-              </li>
-            ))}
+            {loading && (
+              <li style={{ padding: "8px 12px" }}>Buscando…</li>
+            )}
+            {!loading && errorBusq && (
+              <li style={{ padding: "8px 12px", color: "#b91c1c" }}>{errorBusq}</li>
+            )}
+            {!loading && !errorBusq && resultados.length === 0 && busqueda.trim().length >= 2 && (
+              <li style={{ padding: "8px 12px", opacity: 0.7 }}>Sin resultados</li>
+            )}
+            {!loading &&
+              !errorBusq &&
+              resultados.map((s) => (
+                <li
+                  key={s.id}
+                  style={{
+                    cursor: "pointer",
+                    padding: "6px 12px",
+                    borderBottom: "1px solid #eee",
+                    borderRadius: 6,
+                  }}
+                  onClick={() => agregarSocio(s)}
+                  onMouseDown={(e) => e.preventDefault()}
+                >
+                  <b>
+                    {s.apellido} {s.nombre}
+                  </b>{" "}
+                  — DNI: {s.dni}
+                </li>
+              ))}
           </ul>
         )}
       </div>
@@ -143,8 +174,8 @@ export default function CrearGrupoFamiliar() {
           <table className="modern-table">
             <thead>
               <tr>
-                <th>Nombre</th>
                 <th>Apellido</th>
+                <th>Nombre</th>
                 <th>DNI</th>
                 <th>Titular</th>
                 <th></th>
@@ -153,8 +184,8 @@ export default function CrearGrupoFamiliar() {
             <tbody>
               {seleccionados.map((s) => (
                 <tr key={s.id}>
-                  <td>{s.nombre}</td>
                   <td>{s.apellido}</td>
+                  <td>{s.nombre}</td>
                   <td>{s.dni}</td>
                   <td style={{ textAlign: "center" }}>
                     <input
@@ -166,7 +197,11 @@ export default function CrearGrupoFamiliar() {
                     />
                   </td>
                   <td>
-                    <button type="button" onClick={() => quitarSocio(s.id)} className="btn-icon">
+                    <button
+                      type="button"
+                      onClick={() => quitarSocio(s.id)}
+                      className="btn-icon"
+                    >
                       🗑️
                     </button>
                   </td>
@@ -180,12 +215,22 @@ export default function CrearGrupoFamiliar() {
         </div>
       )}
 
-      <button type="submit" className="btn-primary mt-4" disabled={seleccionados.length < 2 || !idTitular}>
+      <button
+        type="submit"
+        className="btn-primary mt-4"
+        disabled={seleccionados.length < 2 || !idTitular}
+      >
         Crear Grupo
       </button>
 
       {mensaje && (
-        <div className="mt-2" style={{ color: mensaje.startsWith("¡") ? "#007e00" : "#b91c1c", fontWeight: 500 }}>
+        <div
+          className="mt-2"
+          style={{
+            color: mensaje.startsWith("¡") ? "#007e00" : "#b91c1c",
+            fontWeight: 500,
+          }}
+        >
           {mensaje}
         </div>
       )}

@@ -63,6 +63,15 @@ export default function IngresarSocio() {
         console.error("Error al cargar formas de pago", err);
         setFormasPago([]);
       });
+
+    // 🔒 Apagar cámara al salir de la página
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChange = (
@@ -146,13 +155,12 @@ export default function IngresarSocio() {
         body: formData,
       });
 
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const data = await res.json();
         alert("Error al subir la foto: " + (data?.error || "Desconocido"));
         return;
       }
 
-      const data = await res.json();
       setForm({ ...form, foto_url: data.url });
       detenerCamara();
       alert("Foto capturada correctamente.");
@@ -177,13 +185,12 @@ export default function IngresarSocio() {
         }),
       });
 
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const data = await res.json();
         alert(data?.error || "Error al registrar socio");
         return;
       }
 
-      const data = await res.json();
       const nuevoSocioId = data.id;
 
       if (confirm("¿Desea imprimir la solicitud del socio?")) {
@@ -220,9 +227,11 @@ export default function IngresarSocio() {
   };
 
   return (
-    <div className="main-content">
+    // 👇 SIN "main-content" para no duplicar el margen del layout
+    <div>
       <div className="form-modern">
         <div className="form-section-title">Ingresar Socio</div>
+
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label>Nombre<input name="nombre" value={form.nombre} onChange={handleChange} /></label>
           <label>Apellido<input name="apellido" value={form.apellido} onChange={handleChange} /></label>
@@ -231,12 +240,14 @@ export default function IngresarSocio() {
           <label>Instagram<input name="instagram" value={form.instagram} onChange={handleChange} /></label>
           <label>Teléfono<input name="telefono" value={form.telefono} onChange={handleChange} /></label>
           <label>Fecha de nacimiento<input type="date" name="fecha_nacimiento" value={form.fecha_nacimiento} onChange={handleChange} /></label>
+
           <label>Estado
             <select name="estado" value={form.estado} onChange={handleChange}>
               <option value="activo">Activo</option>
               <option value="baja">Baja</option>
             </select>
           </label>
+
           <label>Categoría
             <select name="categoria_id" value={form.categoria_id} onChange={handleChange}>
               <option value="">Seleccione una categoría</option>
@@ -245,6 +256,7 @@ export default function IngresarSocio() {
               ))}
             </select>
           </label>
+
           <label>Forma de pago
             <select name="forma_pago_id" value={form.forma_pago_id} onChange={handleChange}>
               <option value="">Seleccione una forma de pago</option>
@@ -253,6 +265,7 @@ export default function IngresarSocio() {
               ))}
             </select>
           </label>
+
           <label>Localidad<input name="localidad" value={form.localidad} onChange={handleChange} /></label>
           <label>Provincia<input name="provincia" value={form.provincia} onChange={handleChange} /></label>
           <label>Dirección<input name="direccion" value={form.direccion} onChange={handleChange} /></label>

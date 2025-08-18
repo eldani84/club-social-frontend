@@ -1,3 +1,4 @@
+// C:\Users\Daniel\Documents\VCC CURSO\club-social-frontend\src\App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { AuthProvider } from "./context/auth";
@@ -22,18 +23,26 @@ import GenerarLinksMasivosMP from "./pages/Cuotas/mercadopago";
 import InformeMorosidadConsolidada from "./pages/Informes/InformeMorosidadConsolidada";
 import InformeCuotasFiltros from "./pages/Informes/InformeCuotasFiltros";
 import CrearUsuario from "./pages/Usuarios/CrearUsuario";
+import EditarImporteCategoria from "./pages/Categorias/EditarImporteCategoria";
 
 // SOCIO
 import LoginSocio from "./pages/Socios/LoginSocio";
 import PerfilSocioDashboard from "./pages/Socios/PerfilSocioDashboard";
 import CambiarClaveSocio from "./pages/Socios/CambiarClaveSocio";
 import VerGrupoFamiliar from "./pages/Socios/VerGrupoFamiliar";
-
 import GenerarLinkPago from "./pages/Socios/GenerarLinkPago";
 import VerSaldosExtra from "./pages/Socios/VerSaldosExtra";
 import VerDatosSocio from "./pages/Socios/VerDatosSocio";
 import CuentaCorriente from "./pages/Socios/CuentaCorriente";
 import CuentaCorrienteDetalle from "./pages/Socios/CuentaCorrienteDetalle";
+
+// DISCIPLINAS
+import InscripcionesSocio from "./pages/Disciplinas/InscripcionesSocio";
+import InscribirSocioDisciplina from "./pages/Disciplinas/InscribirSocioDisciplina";
+import ABMDisciplinas from "./pages/Disciplinas/ABMDisciplinas";
+import GenerarCuotasDisciplina from "./pages/Disciplinas/GenerarCuotasDisciplina"; // ⬅️ NUEVO
+import ImprimirCuotasDisciplina from "./pages/Disciplinas/ImprimirCuotasDisciplina";
+
 import "./styles/ModernUI.css";
 
 export default function App() {
@@ -121,9 +130,16 @@ function LayoutPrivado() {
           <Route path="pagos-rapidos" element={<PagosRapidos />} />
           <Route path="informes/morosidad" element={<InformeMorosidadConsolidada />} />
           <Route path="informes/cuotas" element={<InformeCuotasFiltros />} />
+          <Route path="informes/mora-por-socio" element={<ControlCuotas />} />
           <Route path="usuarios/crear" element={<CrearUsuario />} />
-          
-          
+          <Route path="categorias/editar-importe" element={<EditarImporteCategoria />} />
+
+          {/* DISCIPLINAS */}
+          <Route path="disciplinas/inscribir" element={<InscribirSocioDisciplina />} />
+          <Route path="disciplinas/inscripciones" element={<InscripcionesSocio />} />
+          <Route path="disciplinas/gestionar" element={<ABMDisciplinas />} />
+          <Route path="disciplinas/cuotas/generar" element={<GenerarCuotasDisciplina />} /> {/* ⬅️ NUEVO */}
+          <Route path="disciplinas/cuotas/imprimir" element={<ImprimirCuotasDisciplina />} />
         </Routes>
       </div>
     </div>
@@ -140,10 +156,7 @@ function LayoutSocio() {
       <Route path="perfil/cuotas" element={<CuentaCorriente />} />
       <Route path="perfil/link-pago" element={<GenerarLinkPago />} />
       <Route path="perfil/saldos" element={<VerSaldosExtra />} />
-
-      {/* ✅ CORREGIDA */}
       <Route path="cuenta-corriente/detalle/:dni" element={<CuentaCorrienteDetalle />} />
     </Routes>
   );
 }
-
